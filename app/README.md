@@ -12,7 +12,6 @@ A feature-rich Android live wallpaper application that displays a classic analog
 - [Import/Export System](#importexport-system)
 - [Building from Source](#building-from-source)
 - [Troubleshooting](#troubleshooting)
-- [License](#license)
 
 ## Features
 
@@ -230,10 +229,6 @@ Key build settings in `build.gradle.kts`:
 - Check Logcat for error messages
 - Test with different Android versions
 - Verify all permissions are granted
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
 
 ### Attribution
 - Roman numeral font uses system serif typeface
