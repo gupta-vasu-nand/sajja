@@ -1,68 +1,51 @@
 package com.vng.sajja
 
-import android.app.WallpaperManager
-import android.content.ComponentName
-import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.vng.sajja.settings.WallpaperSettingsRepository
-import com.vng.sajja.ui.SettingsScreen
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.vng.sajja.ui.components.SajjaSplashScreen
+import com.vng.sajja.ui.screens.MainScreen
 import com.vng.sajja.ui.theme.SajjaTheme
+import com.vng.sajja.ui.viewmodel.SettingsViewModel
+import com.vng.sajja.ui.viewmodel.SettingsViewModelFactory
 
 class MainActivity : ComponentActivity() {
 
-    @OptIn(ExperimentalMaterial3Api::class)
+    companion object {
+        private var isFirstLaunch = true
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        val container = (application as SajjaApplication).container
+        val wallpaperRepo = container.wallpaperSettingsRepository
+        val appRepo = container.appSettingsRepository
+
         setContent {
-            SajjaTheme {
-                AppContent(this)
+            val viewModel: SettingsViewModel = viewModel(
+                factory = SettingsViewModelFactory(wallpaperRepo, appRepo)
+            )
+            val appSettings by viewModel.appSettings.collectAsState()
+
+            var showSplash by remember { mutableStateOf(isFirstLaunch) }
+
+            SajjaTheme(appSettings = appSettings) {
+                if (showSplash) {
+                    SajjaSplashScreen(
+                        onDismiss = {
+                            isFirstLaunch = false
+                            showSplash = false
+                        }
+                    )
+                } else {
+                    MainScreen(viewModel = viewModel, modifier = Modifier.fillMaxSize())
+                }
             }
         }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun AppContent(activity: MainActivity) {
-    val repo = WallpaperSettingsRepository(activity)
-
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Roman Clock Wallpaper") },
-                actions = {
-                    TextButton(onClick = {
-                        val intent =
-                            Intent(WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER)
-                                .putExtra(
-                                    WallpaperManager.EXTRA_LIVE_WALLPAPER_COMPONENT,
-                                    ComponentName(
-                                        activity,
-                                        RomanClockWallpaperService::class.java
-                                    )
-                                )
-                        activity.startActivity(intent)
-                    }) {
-                        Text("Apply Wallpaper")
-                    }
-                }
-            )
-        }
-    ) { paddingValues ->
-        SettingsScreen(
-            repo = repo,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        )
     }
 }
