@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.vng.sajja.ui.theme.getContrastingTextColor
 
@@ -68,7 +69,9 @@ fun ToggleOption(label: String, checked: Boolean, onCheckedChange: (Boolean) -> 
         Text(
             text = label,
             style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurface
+            color = MaterialTheme.colorScheme.onSurface,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
         )
         Switch(
             checked = checked,
@@ -101,8 +104,14 @@ fun SliderOption(
                 text = label,
                 style = MaterialTheme.typography.bodyLarge
             )
+            val displayedText = when {
+                unit == "%" && valueRange.endInclusive <= 1f -> "${(value * 100).toInt()}%"
+                unit == "x" -> String.format(java.util.Locale.US, "%.1f x", value)
+                valueRange.endInclusive - valueRange.start <= 5f -> String.format(java.util.Locale.US, "%.1f%s", value, unit)
+                else -> "${value.toInt()}$unit"
+            }
             Text(
-                text = "${value.toInt()}$unit",
+                text = displayedText,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary
             )
@@ -111,7 +120,12 @@ fun SliderOption(
             value = value,
             onValueChange = onValueChange,
             valueRange = valueRange,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            colors = SliderDefaults.colors(
+                thumbColor = MaterialTheme.colorScheme.primary,
+                activeTrackColor = MaterialTheme.colorScheme.primary,
+                inactiveTrackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+            )
         )
     }
 }

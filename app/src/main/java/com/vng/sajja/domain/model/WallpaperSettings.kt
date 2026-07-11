@@ -7,32 +7,20 @@ enum class ClockType {
 }
 
 enum class BackgroundType {
-    SOLID, GRADIENT, IMAGE, COLLAGE
+    SOLID, GRADIENT, IMAGE
 }
 
-enum class CollageLayout {
-    GRID, MASONRY, CENTER_FOCUS, SPIRAL, RANDOM
+enum class ClockPosition {
+    CENTER, TOP_CENTER, BOTTOM_CENTER, TOP_LEFT, TOP_RIGHT
 }
 
-enum class CollageTemplate {
-    MEMORIES, TRAVEL, MINIMAL
+enum class ParticleType {
+    NONE, SNOW, BUBBLES, STARS, FIREFLIES, RAIN
 }
 
-enum class ScaleType {
-    CENTER_CROP, CENTER_INSIDE, FIT_CENTER, ORIGINAL
+enum class DigitalAnimType {
+    NONE, SLIDE, FADE, BOUNCE
 }
-
-data class CollageImage(
-    val uri: String,
-    val x: Float = 0f,
-    val y: Float = 0f,
-    val width: Float = 0.3f,
-    val height: Float = 0.3f,
-    val rotation: Float = 0f,
-    val opacity: Float = 1.0f,
-    val zIndex: Int = 0,
-    val scaleType: ScaleType = ScaleType.CENTER_CROP
-)
 
 data class WallpaperSettings(
     val clockType: ClockType = ClockType.ROMAN,
@@ -40,10 +28,6 @@ data class WallpaperSettings(
     val backgroundColor: Int = Color.BLACK,
     val gradientStartColor: Int = Color.BLACK,
     val gradientEndColor: Int = Color.DKGRAY,
-    val collageImages: List<CollageImage> = emptyList(),
-    val collageLayout: CollageLayout = CollageLayout.GRID,
-    val imageSpacing: Float = 20f,
-    val collageOpacity: Float = 1.0f,
     val clockSize: Float = 0.8f,
     val showBorder: Boolean = true,
     val borderColor: Int = Color.DKGRAY,
@@ -69,62 +53,18 @@ data class WallpaperSettings(
     val showDay: Boolean = true,
     val dayColor: Int = Color.LTGRAY,
     val daySize: Float = 32f,
-    val backgroundImageUri: String? = null
-) {
-    companion object {
-        fun createCollageTemplate(template: CollageTemplate): WallpaperSettings {
-            return when (template) {
-                CollageTemplate.MEMORIES -> WallpaperSettings(
-                    clockType = ClockType.ROMAN,
-                    backgroundType = BackgroundType.COLLAGE,
-                    backgroundColor = Color.parseColor("#1A1A2E"),
-                    collageOpacity = 0.9f,
-                    clockSize = 0.7f,
-                    showBorder = false,
-                    numeralColor = Color.WHITE,
-                    hourHandColor = Color.WHITE,
-                    minuteHandColor = Color.WHITE,
-                    secondHandColor = Color.parseColor("#FF6B8B"),
-                    centerKnobColor = Color.parseColor("#FF6B8B"),
-                    centerRingColor = Color.WHITE,
-                    dateColor = Color.WHITE,
-                    dayColor = Color.WHITE
-                )
-                CollageTemplate.TRAVEL -> WallpaperSettings(
-                    clockType = ClockType.ROMAN,
-                    backgroundType = BackgroundType.COLLAGE,
-                    backgroundColor = Color.parseColor("#0F3460"),
-                    collageOpacity = 0.85f,
-                    clockSize = 0.75f,
-                    showBorder = true,
-                    borderColor = Color.WHITE,
-                    borderWidth = 4f,
-                    numeralColor = Color.WHITE,
-                    hourHandColor = Color.WHITE,
-                    minuteHandColor = Color.WHITE,
-                    secondHandColor = Color.parseColor("#00FFAB"),
-                    centerKnobColor = Color.parseColor("#00FFAB"),
-                    centerRingColor = Color.WHITE,
-                    dateColor = Color.WHITE,
-                    dayColor = Color.WHITE
-                )
-                CollageTemplate.MINIMAL -> WallpaperSettings(
-                    clockType = ClockType.ROMAN,
-                    backgroundType = BackgroundType.COLLAGE,
-                    backgroundColor = Color.BLACK,
-                    collageOpacity = 0.8f,
-                    clockSize = 0.65f,
-                    showBorder = false,
-                    numeralColor = Color.WHITE,
-                    hourHandColor = Color.WHITE,
-                    minuteHandColor = Color.WHITE,
-                    secondHandColor = Color.RED,
-                    centerKnobColor = Color.WHITE,
-                    centerRingColor = Color.WHITE,
-                    dateColor = Color.LTGRAY,
-                    dayColor = Color.LTGRAY
-                )
-            }
-        }
-    }
-}
+    val backgroundImageUri: String? = null,
+    val clockPosition: ClockPosition = ClockPosition.CENTER,
+    val showBottomText: Boolean = true,
+    val clockOffsetX: Float = 0f,
+    val clockOffsetY: Float = 0f,
+    val use24HourFormat: Boolean = false,
+    val showDigitalClockPlate: Boolean = false,
+    val digitalClockPlateOpacity: Float = 0.3f,
+    val digitalClockFontIndex: Int = 0,
+    val particleType: ParticleType = ParticleType.NONE,
+    val particleSpeed: Float = 1.0f,
+    val particleCount: Int = 40,
+    val digitalAnimType: DigitalAnimType = DigitalAnimType.NONE,
+    val digitalAnimDuration: Long = 300L
+)
