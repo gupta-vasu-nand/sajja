@@ -22,6 +22,7 @@ import com.vng.sajja.domain.model.AppThemeMode
 import com.vng.sajja.ui.components.AdvancedColorPickerDialog
 import com.vng.sajja.ui.components.GlassmorphicCard
 import com.vng.sajja.ui.viewmodel.SettingsViewModel
+import com.vng.sajja.ui.theme.getContrastingTextColor
 
 @Composable
 fun AppSettingsScreen(
@@ -47,11 +48,24 @@ fun AppSettingsScreen(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 AppThemeMode.entries.forEach { mode ->
+                    val isSelected = appSettings.themeMode == mode
+                    val contrastColor = getContrastingTextColor(MaterialTheme.colorScheme.primary)
                     FilterChip(
-                        selected = appSettings.themeMode == mode,
+                        selected = isSelected,
                         onClick = { viewModel.updateAppThemeMode(mode) },
-                        label = { Text(mode.name) },
-                        modifier = Modifier.weight(1f)
+                        label = {
+                            Text(
+                                text = mode.name,
+                                color = if (isSelected) contrastColor else MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        },
+                        modifier = Modifier.weight(1f),
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = MaterialTheme.colorScheme.primary,
+                            selectedLabelColor = contrastColor,
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+                            labelColor = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     )
                 }
             }

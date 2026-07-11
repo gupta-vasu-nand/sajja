@@ -11,12 +11,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.vng.sajja.domain.model.ClockType
+import com.vng.sajja.domain.model.ClockPosition
+import com.vng.sajja.domain.model.DigitalAnimType
+import com.vng.sajja.domain.model.ParticleType
 import com.vng.sajja.ui.components.*
 import com.vng.sajja.ui.utils.toComposeColor
 import com.vng.sajja.ui.viewmodel.SettingsViewModel
+import com.vng.sajja.ui.theme.getContrastingTextColor
 
 @Composable
 fun ClockSettingsScreen(
@@ -38,16 +43,33 @@ fun ClockSettingsScreen(
                 Text("Clock Face Type", style = MaterialTheme.typography.titleMedium)
                 Spacer(modifier = Modifier.height(12.dp))
 
+// Note: ClockType.entries loop inside ClockSettingsScreen
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     ClockType.entries.forEach { type ->
+                        val isSelected = settings.clockType == type
+                        val contrastColor = getContrastingTextColor(MaterialTheme.colorScheme.primary)
                         FilterChip(
-                            selected = settings.clockType == type,
+                            selected = isSelected,
                             onClick = { viewModel.updateSettings(settings.copy(clockType = type)) },
-                            label = { Text(type.name, style = MaterialTheme.typography.bodySmall) },
-                            modifier = Modifier.weight(1f)
+                            label = {
+                                Text(
+                                    text = type.name,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    color = if (isSelected) contrastColor else MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            },
+                            modifier = Modifier.weight(1f),
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = MaterialTheme.colorScheme.primary,
+                                selectedLabelColor = contrastColor,
+                                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+                                labelColor = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                         )
                     }
                 }
@@ -67,7 +89,12 @@ fun ClockSettingsScreen(
                     value = settings.clockSize,
                     onValueChange = { viewModel.updateSettings(settings.copy(clockSize = it)) },
                     valueRange = 0.5f..1.0f,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = SliderDefaults.colors(
+                        thumbColor = MaterialTheme.colorScheme.primary,
+                        activeTrackColor = MaterialTheme.colorScheme.primary,
+                        inactiveTrackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+                    )
                 )
             }
 
@@ -222,8 +249,8 @@ fun ClockSettingsScreen(
             } else {
                 // Digital clock numeral configuration
                 GlassmorphicCard(modifier = Modifier.fillMaxWidth()) {
-                    Text("Digital Numerals", style = MaterialTheme.typography.titleMedium)
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Text("Digital Clock Style & Font", style = MaterialTheme.typography.titleMedium)
+                    Spacer(modifier = Modifier.height(12.dp))
 
                     ColorOptionCard(
                         label = "Time Color",
@@ -231,12 +258,209 @@ fun ClockSettingsScreen(
                         onClick = { showColorPicker = "numeral_color" }
                     )
                     SliderOption(
-                        label = "Time Font Size",
+                        label = "Time Font Size Scale",
                         value = settings.numeralSize,
                         onValueChange = { viewModel.updateSettings(settings.copy(numeralSize = it)) },
                         valueRange = 20f..80f,
                         unit = "sp"
                     )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    val contrastColor = getContrastingTextColor(MaterialTheme.colorScheme.primary)
+                    val chipColors = FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = MaterialTheme.colorScheme.primary,
+                        selectedLabelColor = contrastColor,
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+                        labelColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                    Text("Clock Font Style", style = MaterialTheme.typography.titleSmall, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            listOf("Monospace", "Sans Serif").forEachIndexed { index, fontName ->
+                                val isSelected = settings.digitalClockFontIndex == index
+                                FilterChip(
+                                    selected = isSelected,
+                                    onClick = { viewModel.updateSettings(settings.copy(digitalClockFontIndex = index)) },
+                                    label = { Text(fontName, maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                                    colors = chipColors,
+                                    modifier = Modifier.weight(1f)
+                                )
+                            }
+                        }
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            listOf("Serif", "Default").forEachIndexed { index, fontName ->
+                                val actualIndex = index + 2
+                                val isSelected = settings.digitalClockFontIndex == actualIndex
+                                FilterChip(
+                                    selected = isSelected,
+                                    onClick = { viewModel.updateSettings(settings.copy(digitalClockFontIndex = actualIndex)) },
+                                    label = { Text(fontName, maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                                    colors = chipColors,
+                                    modifier = Modifier.weight(1f)
+                                )
+                            }
+                        }
+                    }
+                }
+
+                GlassmorphicCard(modifier = Modifier.fillMaxWidth()) {
+                    Text("Display Formats", style = MaterialTheme.typography.titleMedium)
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    ToggleOption(
+                        label = "Show Seconds",
+                        checked = settings.showSecondHand,
+                        onCheckedChange = { viewModel.updateSettings(settings.copy(showSecondHand = it)) }
+                    )
+                    ToggleOption(
+                        label = "Use 24-Hour Format",
+                        checked = settings.use24HourFormat,
+                        onCheckedChange = { viewModel.updateSettings(settings.copy(use24HourFormat = it)) }
+                    )
+                    ToggleOption(
+                        label = "Show Bottom Info (Date & Day)",
+                        checked = settings.showBottomText,
+                        onCheckedChange = { viewModel.updateSettings(settings.copy(showBottomText = it)) }
+                    )
+
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
+
+                    Text("Number Switching Animation", style = MaterialTheme.typography.titleSmall, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    val contrastColor = getContrastingTextColor(MaterialTheme.colorScheme.primary)
+                    val chipColors = FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = MaterialTheme.colorScheme.primary,
+                        selectedLabelColor = contrastColor,
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+                        labelColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        listOf(DigitalAnimType.NONE, DigitalAnimType.SLIDE, DigitalAnimType.FADE, DigitalAnimType.BOUNCE).forEach { anim ->
+                            val isSelected = settings.digitalAnimType == anim
+                            FilterChip(
+                                selected = isSelected,
+                                onClick = { viewModel.updateSettings(settings.copy(digitalAnimType = anim)) },
+                                label = { Text(anim.name, maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                                colors = chipColors,
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                    }
+
+                    if (settings.digitalAnimType != DigitalAnimType.NONE) {
+                        SliderOption(
+                            label = "Animation Duration",
+                            value = settings.digitalAnimDuration.toFloat(),
+                            onValueChange = { viewModel.updateSettings(settings.copy(digitalAnimDuration = it.toLong())) },
+                            valueRange = 100f..800f,
+                            unit = "ms"
+                        )
+                    }
+                }
+
+                GlassmorphicCard(modifier = Modifier.fillMaxWidth()) {
+                    Text("Position & Fine Tuning", style = MaterialTheme.typography.titleMedium)
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Text("Default Alignment", style = MaterialTheme.typography.titleSmall, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    val contrastColor = getContrastingTextColor(MaterialTheme.colorScheme.primary)
+                    val chipColors = FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = MaterialTheme.colorScheme.primary,
+                        selectedLabelColor = contrastColor,
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+                        labelColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            listOf(ClockPosition.TOP_LEFT, ClockPosition.TOP_CENTER, ClockPosition.TOP_RIGHT).forEach { pos ->
+                                val isSelected = settings.clockPosition == pos
+                                FilterChip(
+                                    selected = isSelected,
+                                    onClick = { viewModel.updateSettings(settings.copy(clockPosition = pos)) },
+                                    label = { Text(pos.name.replace("_", " "), maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                                    colors = chipColors,
+                                    modifier = Modifier.weight(1f)
+                                )
+                            }
+                        }
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            listOf(ClockPosition.CENTER, ClockPosition.BOTTOM_CENTER).forEach { pos ->
+                                val isSelected = settings.clockPosition == pos
+                                FilterChip(
+                                    selected = isSelected,
+                                    onClick = { viewModel.updateSettings(settings.copy(clockPosition = pos)) },
+                                    label = { Text(pos.name.replace("_", " "), maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                                    colors = chipColors,
+                                    modifier = Modifier.weight(1f)
+                                )
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+                    HorizontalDivider()
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    SliderOption(
+                        label = "Horizontal Fine Tuning (X Offset)",
+                        value = settings.clockOffsetX,
+                        onValueChange = { viewModel.updateSettings(settings.copy(clockOffsetX = it)) },
+                        valueRange = -300f..300f,
+                        unit = "px"
+                    )
+
+                    SliderOption(
+                        label = "Vertical Fine Tuning (Y Offset)",
+                        value = settings.clockOffsetY,
+                        onValueChange = { viewModel.updateSettings(settings.copy(clockOffsetY = it)) },
+                        valueRange = -600f..600f,
+                        unit = "px"
+                    )
+                }
+
+                GlassmorphicCard(modifier = Modifier.fillMaxWidth()) {
+                    Text("Glass Panel Backing", style = MaterialTheme.typography.titleMedium)
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    ToggleOption(
+                        label = "Enable Clock Glass Plate",
+                        checked = settings.showDigitalClockPlate,
+                        onCheckedChange = { viewModel.updateSettings(settings.copy(showDigitalClockPlate = it)) }
+                    )
+
+                    if (settings.showDigitalClockPlate) {
+                        SliderOption(
+                            label = "Plate Opacity",
+                            value = settings.digitalClockPlateOpacity,
+                            onValueChange = { viewModel.updateSettings(settings.copy(digitalClockPlateOpacity = it)) },
+                            valueRange = 0.05f..0.85f,
+                            unit = "%"
+                        )
+                    }
                 }
             }
 
@@ -286,6 +510,80 @@ fun ClockSettingsScreen(
                         onValueChange = { viewModel.updateSettings(settings.copy(daySize = it)) },
                         valueRange = 20f..60f,
                         unit = "px"
+                    )
+                }
+            }
+
+            // Particle Effects Card
+            GlassmorphicCard(modifier = Modifier.fillMaxWidth()) {
+                Text("Background Particle Effects", style = MaterialTheme.typography.titleMedium)
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    "Add live floating animation effects to your wallpaper background",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+
+                val contrastColor = getContrastingTextColor(MaterialTheme.colorScheme.primary)
+                val chipColors = FilterChipDefaults.filterChipColors(
+                    selectedContainerColor = MaterialTheme.colorScheme.primary,
+                    selectedLabelColor = contrastColor,
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+                    labelColor = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    listOf(ParticleType.NONE, ParticleType.SNOW, ParticleType.BUBBLES).forEach { type ->
+                        val isSelected = settings.particleType == type
+                        FilterChip(
+                            selected = isSelected,
+                            onClick = { viewModel.updateSettings(settings.copy(particleType = type)) },
+                            label = { Text(type.name, maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                            colors = chipColors,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    listOf(ParticleType.STARS, ParticleType.FIREFLIES, ParticleType.RAIN).forEach { type ->
+                        val isSelected = settings.particleType == type
+                        FilterChip(
+                            selected = isSelected,
+                            onClick = { viewModel.updateSettings(settings.copy(particleType = type)) },
+                            label = { Text(type.name, maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                            colors = chipColors,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                }
+
+                if (settings.particleType != ParticleType.NONE) {
+                    Spacer(modifier = Modifier.height(12.dp))
+                    HorizontalDivider()
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    SliderOption(
+                        label = "Particle Speed",
+                        value = settings.particleSpeed,
+                        onValueChange = { viewModel.updateSettings(settings.copy(particleSpeed = it)) },
+                        valueRange = 0.2f..3.0f,
+                        unit = "x"
+                    )
+
+                    SliderOption(
+                        label = "Particle Density (Count)",
+                        value = settings.particleCount.toFloat(),
+                        onValueChange = { viewModel.updateSettings(settings.copy(particleCount = it.toInt())) },
+                        valueRange = 10f..150f,
+                        unit = " particles"
                     )
                 }
             }

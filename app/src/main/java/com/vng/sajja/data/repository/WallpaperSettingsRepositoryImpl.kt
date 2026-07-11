@@ -3,21 +3,14 @@ package com.vng.sajja.data.repository
 import android.content.Context
 import android.graphics.Color
 import androidx.core.content.edit
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import com.vng.sajja.domain.model.*
 import com.vng.sajja.domain.repository.WallpaperSettingsRepository
 
 class WallpaperSettingsRepositoryImpl(context: Context) : WallpaperSettingsRepository {
 
     private val prefs = context.getSharedPreferences("roman_clock_settings", Context.MODE_PRIVATE)
-    private val gson = Gson()
 
     override fun load(): WallpaperSettings {
-        val collageJson = prefs.getString("collage_images", "[]")
-        val collageType = object : TypeToken<List<CollageImage>>() {}.type
-        val collageImages = gson.fromJson<List<CollageImage>>(collageJson, collageType) ?: emptyList()
-
         return WallpaperSettings(
             clockType = ClockType.valueOf(
                 prefs.getString("clock_type", ClockType.ROMAN.name)!!
@@ -28,12 +21,6 @@ class WallpaperSettingsRepositoryImpl(context: Context) : WallpaperSettingsRepos
             backgroundColor = prefs.getInt("bg_color", Color.BLACK),
             gradientStartColor = prefs.getInt("grad_start", Color.BLACK),
             gradientEndColor = prefs.getInt("grad_end", Color.DKGRAY),
-            collageImages = collageImages,
-            collageLayout = CollageLayout.valueOf(
-                prefs.getString("collage_layout", CollageLayout.GRID.name)!!
-            ),
-            imageSpacing = prefs.getFloat("image_spacing", 20f),
-            collageOpacity = prefs.getFloat("collage_opacity", 1.0f),
             clockSize = prefs.getFloat("clock_size", 0.8f),
             showBorder = prefs.getBoolean("show_border", true),
             borderColor = prefs.getInt("border_color", Color.DKGRAY),
@@ -58,7 +45,27 @@ class WallpaperSettingsRepositoryImpl(context: Context) : WallpaperSettingsRepos
             dateSize = prefs.getFloat("date_size", 36f),
             showDay = prefs.getBoolean("show_day", true),
             dayColor = prefs.getInt("day_color", Color.LTGRAY),
-            daySize = prefs.getFloat("day_size", 32f)
+            daySize = prefs.getFloat("day_size", 32f),
+            backgroundImageUri = prefs.getString("bg_image_uri", null),
+            clockPosition = ClockPosition.valueOf(
+                prefs.getString("clock_position", ClockPosition.CENTER.name)!!
+            ),
+            showBottomText = prefs.getBoolean("show_bottom_text", true),
+            clockOffsetX = prefs.getFloat("clock_offset_x", 0f),
+            clockOffsetY = prefs.getFloat("clock_offset_y", 0f),
+            use24HourFormat = prefs.getBoolean("use_24_hour", false),
+            showDigitalClockPlate = prefs.getBoolean("show_digital_plate", false),
+            digitalClockPlateOpacity = prefs.getFloat("digital_plate_opacity", 0.3f),
+            digitalClockFontIndex = prefs.getInt("digital_clock_font", 0),
+            particleType = ParticleType.valueOf(
+                prefs.getString("particle_type", ParticleType.NONE.name)!!
+            ),
+            particleSpeed = prefs.getFloat("particle_speed", 1.0f),
+            particleCount = prefs.getInt("particle_count", 40),
+            digitalAnimType = DigitalAnimType.valueOf(
+                prefs.getString("digital_anim_type", DigitalAnimType.NONE.name)!!
+            ),
+            digitalAnimDuration = prefs.getLong("digital_anim_duration", 300L)
         )
     }
 
@@ -69,10 +76,6 @@ class WallpaperSettingsRepositoryImpl(context: Context) : WallpaperSettingsRepos
             putInt("bg_color", s.backgroundColor)
             putInt("grad_start", s.gradientStartColor)
             putInt("grad_end", s.gradientEndColor)
-            putString("collage_images", gson.toJson(s.collageImages))
-            putString("collage_layout", s.collageLayout.name)
-            putFloat("image_spacing", s.imageSpacing)
-            putFloat("collage_opacity", s.collageOpacity)
             putFloat("clock_size", s.clockSize)
             putBoolean("show_border", s.showBorder)
             putInt("border_color", s.borderColor)
@@ -98,6 +101,20 @@ class WallpaperSettingsRepositoryImpl(context: Context) : WallpaperSettingsRepos
             putBoolean("show_day", s.showDay)
             putInt("day_color", s.dayColor)
             putFloat("day_size", s.daySize)
+            putString("bg_image_uri", s.backgroundImageUri)
+            putString("clock_position", s.clockPosition.name)
+            putBoolean("show_bottom_text", s.showBottomText)
+            putFloat("clock_offset_x", s.clockOffsetX)
+            putFloat("clock_offset_y", s.clockOffsetY)
+            putBoolean("use_24_hour", s.use24HourFormat)
+            putBoolean("show_digital_plate", s.showDigitalClockPlate)
+            putFloat("digital_plate_opacity", s.digitalClockPlateOpacity)
+            putInt("digital_clock_font", s.digitalClockFontIndex)
+            putString("particle_type", s.particleType.name)
+            putFloat("particle_speed", s.particleSpeed)
+            putInt("particle_count", s.particleCount)
+            putString("digital_anim_type", s.digitalAnimType.name)
+            putLong("digital_anim_duration", s.digitalAnimDuration)
         }
     }
 }

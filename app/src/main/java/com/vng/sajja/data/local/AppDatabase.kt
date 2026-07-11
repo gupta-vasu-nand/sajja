@@ -5,9 +5,10 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-@Database(entities = [AppAccentColorEntity::class], version = 1, exportSchema = false)
+@Database(entities = [AppAccentColorEntity::class, CustomAnimationEntity::class], version = 2, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun appAccentColorDao(): AppAccentColorDao
+    abstract fun customAnimationDao(): CustomAnimationDao
 
     companion object {
         @Volatile
@@ -20,6 +21,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "sajja_database"
                 )
+                .fallbackToDestructiveMigration()
                 .allowMainThreadQueries()
                 .build()
                 INSTANCE = instance

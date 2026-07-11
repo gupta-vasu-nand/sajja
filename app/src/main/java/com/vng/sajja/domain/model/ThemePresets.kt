@@ -49,8 +49,5 @@ object ThemePresets {
         minuteHandColor = Color.WHITE
     )
 
-    // Collage templates
-    val MemoriesCollage = WallpaperSettings.createCollageTemplate(CollageTemplate.MEMORIES)
-    val TravelCollage = WallpaperSettings.createCollageTemplate(CollageTemplate.TRAVEL)
-    val MinimalCollage = WallpaperSettings.createCollageTemplate(CollageTemplate.MINIMAL)
+
 }

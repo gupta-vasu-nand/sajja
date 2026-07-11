@@ -4,8 +4,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material.icons.filled.AccessTime
+import androidx.compose.material.icons.filled.Image
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -29,8 +29,8 @@ data class BottomNavBarItem(
 object BottomNavBarItems {
     val items = listOf(
         BottomNavBarItem("dashboard", "Home", Icons.Default.Home),
-        BottomNavBarItem("tools_settings", "Tools", Icons.Default.Settings),
-        BottomNavBarItem("app_settings", "Settings", Icons.Default.Tune)
+        BottomNavBarItem("clock_settings", "Clock Face", Icons.Default.AccessTime),
+        BottomNavBarItem("background_settings", "Background", Icons.Default.Image)
     )
 }
 

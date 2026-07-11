@@ -20,10 +20,14 @@ fun LivePreview(settings: WallpaperSettings, modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val bitmapCache = remember { mutableMapOf<String, Bitmap>() }
 
-    LaunchedEffect(settings.smoothSecondHand) {
+    val isAnimated = settings.smoothSecondHand ||
+            settings.particleType != com.vng.sajja.domain.model.ParticleType.NONE ||
+            settings.digitalAnimType != com.vng.sajja.domain.model.DigitalAnimType.NONE
+
+    LaunchedEffect(isAnimated) {
         while (true) {
             time = Calendar.getInstance()
-            delay(if (settings.smoothSecondHand) 16 else 1000)
+            delay(if (isAnimated) 16 else 1000)
         }
     }
 
