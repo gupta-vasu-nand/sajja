@@ -1,8 +1,41 @@
-package com.vng.sajja.settings
+package com.vng.sajja.domain.model
 
 import android.graphics.Color
 
+enum class ClockType {
+    ROMAN, ARABIC, DIGITAL, MINIMALIST
+}
+
+enum class BackgroundType {
+    SOLID, GRADIENT, IMAGE, COLLAGE
+}
+
+enum class CollageLayout {
+    GRID, MASONRY, CENTER_FOCUS, SPIRAL, RANDOM
+}
+
+enum class CollageTemplate {
+    MEMORIES, TRAVEL, MINIMAL
+}
+
+enum class ScaleType {
+    CENTER_CROP, CENTER_INSIDE, FIT_CENTER, ORIGINAL
+}
+
+data class CollageImage(
+    val uri: String,
+    val x: Float = 0f,
+    val y: Float = 0f,
+    val width: Float = 0.3f,
+    val height: Float = 0.3f,
+    val rotation: Float = 0f,
+    val opacity: Float = 1.0f,
+    val zIndex: Int = 0,
+    val scaleType: ScaleType = ScaleType.CENTER_CROP
+)
+
 data class WallpaperSettings(
+    val clockType: ClockType = ClockType.ROMAN,
     val backgroundType: BackgroundType = BackgroundType.SOLID,
     val backgroundColor: Int = Color.BLACK,
     val gradientStartColor: Int = Color.BLACK,
@@ -35,12 +68,14 @@ data class WallpaperSettings(
     val dateSize: Float = 36f,
     val showDay: Boolean = true,
     val dayColor: Int = Color.LTGRAY,
-    val daySize: Float = 32f
+    val daySize: Float = 32f,
+    val backgroundImageUri: String? = null
 ) {
     companion object {
         fun createCollageTemplate(template: CollageTemplate): WallpaperSettings {
             return when (template) {
                 CollageTemplate.MEMORIES -> WallpaperSettings(
+                    clockType = ClockType.ROMAN,
                     backgroundType = BackgroundType.COLLAGE,
                     backgroundColor = Color.parseColor("#1A1A2E"),
                     collageOpacity = 0.9f,
@@ -56,6 +91,7 @@ data class WallpaperSettings(
                     dayColor = Color.WHITE
                 )
                 CollageTemplate.TRAVEL -> WallpaperSettings(
+                    clockType = ClockType.ROMAN,
                     backgroundType = BackgroundType.COLLAGE,
                     backgroundColor = Color.parseColor("#0F3460"),
                     collageOpacity = 0.85f,
@@ -73,6 +109,7 @@ data class WallpaperSettings(
                     dayColor = Color.WHITE
                 )
                 CollageTemplate.MINIMAL -> WallpaperSettings(
+                    clockType = ClockType.ROMAN,
                     backgroundType = BackgroundType.COLLAGE,
                     backgroundColor = Color.BLACK,
                     collageOpacity = 0.8f,
@@ -91,31 +128,3 @@ data class WallpaperSettings(
         }
     }
 }
-
-enum class BackgroundType {
-    SOLID, GRADIENT, COLLAGE
-}
-
-enum class CollageLayout {
-    GRID, MASONRY, CENTER_FOCUS, SPIRAL, RANDOM
-}
-
-enum class CollageTemplate {
-    MEMORIES, TRAVEL, MINIMAL
-}
-
-enum class ScaleType {
-    CENTER_CROP, CENTER_INSIDE, FIT_CENTER, ORIGINAL
-}
-
-data class CollageImage(
-    val uri: String,
-    val x: Float = 0f,
-    val y: Float = 0f,
-    val width: Float = 0.3f,
-    val height: Float = 0.3f,
-    val rotation: Float = 0f,
-    val opacity: Float = 1.0f,
-    val zIndex: Int = 0,
-    val scaleType: ScaleType = ScaleType.CENTER_CROP
-)
