@@ -1,4 +1,4 @@
-package com.vng.sajja.settings
+package com.vng.sajja.domain.model
 
 import android.graphics.Color
 

@@ -1,23 +1,27 @@
-package com.vng.sajja.settings
+package com.vng.sajja.data.repository
 
 import android.content.Context
 import android.graphics.Color
 import androidx.core.content.edit
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.vng.sajja.domain.model.*
+import com.vng.sajja.domain.repository.WallpaperSettingsRepository
 
-class WallpaperSettingsRepository(context: Context) {
+class WallpaperSettingsRepositoryImpl(context: Context) : WallpaperSettingsRepository {
 
-    private val prefs =
-        context.getSharedPreferences("roman_clock_settings", Context.MODE_PRIVATE)
+    private val prefs = context.getSharedPreferences("roman_clock_settings", Context.MODE_PRIVATE)
     private val gson = Gson()
 
-    fun load(): WallpaperSettings {
+    override fun load(): WallpaperSettings {
         val collageJson = prefs.getString("collage_images", "[]")
         val collageType = object : TypeToken<List<CollageImage>>() {}.type
         val collageImages = gson.fromJson<List<CollageImage>>(collageJson, collageType) ?: emptyList()
 
         return WallpaperSettings(
+            clockType = ClockType.valueOf(
+                prefs.getString("clock_type", ClockType.ROMAN.name)!!
+            ),
             backgroundType = BackgroundType.valueOf(
                 prefs.getString("bg_type", BackgroundType.SOLID.name)!!
             ),
@@ -58,8 +62,9 @@ class WallpaperSettingsRepository(context: Context) {
         )
     }
 
-    fun save(s: WallpaperSettings) {
+    override fun save(s: WallpaperSettings) {
         prefs.edit {
+            putString("clock_type", s.clockType.name)
             putString("bg_type", s.backgroundType.name)
             putInt("bg_color", s.backgroundColor)
             putInt("grad_start", s.gradientStartColor)

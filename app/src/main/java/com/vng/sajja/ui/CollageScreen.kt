@@ -2,84 +2,97 @@ package com.vng.sajja.ui
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.gestures.detectTransformGestures
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AddCircleOutline
 import androidx.compose.material.icons.filled.AddPhotoAlternate
+import androidx.compose.material.icons.filled.AspectRatio
 import androidx.compose.material.icons.filled.AutoAwesomeMosaic
 import androidx.compose.material.icons.filled.CenterFocusStrong
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.CompareArrows
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DeleteSweep
+import androidx.compose.material.icons.filled.DragHandle
+import androidx.compose.material.icons.filled.Fullscreen
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.PhotoLibrary
-import androidx.compose.material.icons.filled.Rotate90DegreesCcw
+import androidx.compose.material.icons.filled.RemoveCircleOutline
 import androidx.compose.material.icons.filled.RotateRight
 import androidx.compose.material.icons.filled.Shuffle
+import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.filled.ViewDay
-import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
-import com.vng.sajja.settings.CollageImage
-import com.vng.sajja.settings.CollageLayout
-import com.vng.sajja.settings.ScaleType
-import com.vng.sajja.settings.WallpaperSettings
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import com.vng.sajja.domain.model.BackgroundType
+import com.vng.sajja.domain.model.CollageImage
+import com.vng.sajja.domain.model.CollageLayout
+import com.vng.sajja.domain.model.ScaleType
+import com.vng.sajja.domain.model.WallpaperSettings
+import com.vng.sajja.ui.components.AdvancedColorPickerDialog
+import com.vng.sajja.ui.components.ImageThumbnail
+import com.vng.sajja.ui.components.InteractiveCollageImage
 import kotlin.math.roundToInt
 
 @Composable
@@ -93,6 +106,12 @@ fun CollageScreen(
     var selectedImage by remember { mutableStateOf<CollageImage?>(null) }
     var showLayoutOptions by remember { mutableStateOf(false) }
     var showBatchEditor by remember { mutableStateOf(false) }
+    var isFullScreen by remember { mutableStateOf(false) }
+    var showColorPickerTarget by remember { mutableStateOf<String?>(null) }
+
+    // Floating bar offset state for dragging
+    var barOffsetX by remember { mutableStateOf(0f) }
+    var barOffsetY by remember { mutableStateOf(0f) }
 
     val imagePicker = rememberLauncherForActivityResult(
         ActivityResultContracts.GetMultipleContents()
@@ -106,11 +125,11 @@ fun CollageScreen(
                 uri = uri.toString(),
                 x = 0.05f + col * 0.3f,
                 y = 0.05f + row * 0.3f,
-                width = 0.25f + (index % 3) * 0.05f,
-                height = 0.25f + (index % 3) * 0.05f,
+                width = 0.25f,
+                height = 0.25f,
                 rotation = (index * 5f) % 360f,
                 zIndex = index,
-                opacity = 0.8f + (index % 3) * 0.05f
+                opacity = 0.9f
             )
         }
 
@@ -120,334 +139,759 @@ fun CollageScreen(
         onUpdateSettings(updated)
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        // Header with actions
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column {
-                Text(
-                    text = "Image Collage",
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = "${settings.collageImages.size} images",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                IconButton(
-                    onClick = {
-                        if (settings.collageImages.isEmpty()) {
-                            showAddImagesToast(context)
-                        } else {
-                            showLayoutOptions = true
-                        }
-                    },
-                    modifier = Modifier.size(40.dp)
-                ) {
-                    Icon(Icons.Default.AutoAwesomeMosaic, contentDescription = "Layout")
-                }
-                IconButton(
-                    onClick = {
-                        if (settings.collageImages.isEmpty()) {
-                            showAddImagesToast(context)
-                        } else {
-                            showBatchEditor = true
-                        }
-                    },
-                    modifier = Modifier.size(40.dp)
-                ) {
-                    Icon(Icons.Default.Tune, contentDescription = "Batch Edit")
-                }
-                FilledTonalButton(
-                    onClick = { showImagePicker = true }
-                ) {
-                    Icon(Icons.Default.AddPhotoAlternate, contentDescription = null)
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = "Add Images",
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-            }
-        }
-
-        // Quick controls
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+    if (isFullScreen) {
+        // Immersive Full Screen Collage Editor Mode using Dialog
+        Dialog(
+            onDismissRequest = { isFullScreen = false },
+            properties = DialogProperties(
+                usePlatformDefaultWidth = false,
+                decorFitsSystemWindows = false
             )
         ) {
-            Column(
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+            Surface(
+                modifier = Modifier.fillMaxSize(),
+                color = Color.Black
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                Box(
+                    modifier = Modifier.fillMaxSize()
                 ) {
-                    Column {
+                    // Background Canvas
+                    BoxWithConstraints(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clickable { selectedImage = null }
+                    ) {
+                        val containerWidth = maxWidth
+                        val containerHeight = maxHeight
+
+                        // Render Background
+                        when (settings.backgroundType) {
+                            BackgroundType.SOLID -> {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .background(Color(settings.backgroundColor))
+                                )
+                            }
+
+                            BackgroundType.GRADIENT -> {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .background(
+                                            Brush.linearGradient(
+                                                colors = listOf(
+                                                    Color(settings.gradientStartColor),
+                                                    Color(settings.gradientEndColor)
+                                                )
+                                            )
+                                        )
+                                )
+                            }
+
+                            BackgroundType.IMAGE -> {
+                                settings.backgroundImageUri?.let { uri ->
+                                    Box(modifier = Modifier.fillMaxSize()) {
+                                        coil.compose.AsyncImage(
+                                            model = uri,
+                                            contentDescription = null,
+                                            modifier = Modifier.fillMaxSize(),
+                                            contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                                        )
+                                    }
+                                } ?: Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .background(Color(settings.backgroundColor))
+                                )
+                            }
+
+                            BackgroundType.COLLAGE -> {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .background(Color(settings.backgroundColor))
+                                )
+                            }
+                        }
+
+                        // Render collage images
+                        settings.collageImages.sortedBy { it.zIndex }.forEach { image ->
+                            key(image.uri) {
+                                InteractiveCollageImage(
+                                    image = image,
+                                    settings = settings,
+                                    isSelected = selectedImage?.uri == image.uri,
+                                    containerWidth = containerWidth,
+                                    containerHeight = containerHeight,
+                                    onClick = { selectedImage = image },
+                                    onUpdate = { updatedImage ->
+                                        val updatedList = settings.collageImages.map {
+                                            if (it.uri == updatedImage.uri) updatedImage else it
+                                        }
+                                        onUpdateSettings(settings.copy(collageImages = updatedList))
+                                        if (selectedImage?.uri == image.uri) {
+                                            selectedImage = updatedImage
+                                        }
+                                    },
+                                    onRemove = {
+                                        val updatedList =
+                                            settings.collageImages.filter { it.uri != image.uri }
+                                        onUpdateSettings(settings.copy(collageImages = updatedList))
+                                        if (selectedImage?.uri == image.uri) {
+                                            selectedImage = null
+                                        }
+                                    }
+                                )
+                            }
+                        }
+                    }
+
+                    // Top overlay bar (Exit, Guidance Info, Add Image)
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .statusBarsPadding()
+                            .padding(16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        IconButton(
+                            onClick = { isFullScreen = false },
+                            modifier = Modifier
+                                .clip(CircleShape)
+                                .background(Color.Black.copy(alpha = 0.5f))
+                        ) {
+                            Icon(
+                                Icons.Default.Close,
+                                contentDescription = "Exit Full Screen",
+                                tint = Color.White
+                            )
+                        }
+
                         Text(
-                            text = "Overall Settings",
-                            style = MaterialTheme.typography.bodyLarge
-                        )
-                        Text(
-                            text = "Adjust all images at once",
+                            text = "Drag bar to reposition controls",
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = Color.White.copy(alpha = 0.7f),
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(Color.Black.copy(alpha = 0.5f))
+                                .padding(horizontal = 12.dp, vertical = 6.dp)
                         )
-                    }
-                }
 
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text("Collage Opacity")
-                        Text("${(settings.collageOpacity * 100).roundToInt()}%")
+                        IconButton(
+                            onClick = { showImagePicker = true },
+                            modifier = Modifier
+                                .clip(CircleShape)
+                                .background(Color.Black.copy(alpha = 0.5f))
+                        ) {
+                            Icon(
+                                Icons.Default.AddPhotoAlternate,
+                                contentDescription = "Add Images",
+                                tint = Color.White
+                            )
+                        }
                     }
-                    Slider(
-                        value = settings.collageOpacity,
-                        onValueChange = {
-                            onUpdateSettings(settings.copy(collageOpacity = it))
-                        },
-                        valueRange = 0f..1f,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
 
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                    // Draggable Floating Horizontal Editing Bar with Glassmorphic visual style
+                    Card(
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .navigationBarsPadding()
+                            .padding(bottom = 24.dp)
+                            .padding(horizontal = 16.dp)
+                            .widthIn(max = 600.dp)
+                            .offset { IntOffset(barOffsetX.roundToInt(), barOffsetY.roundToInt()) }
+                            .pointerInput(Unit) {
+                                detectDragGestures { change, dragAmount ->
+                                    change.consume()
+                                    barOffsetX += dragAmount.x
+                                    barOffsetY += dragAmount.y
+                                }
+                            },
+                        shape = RoundedCornerShape(24.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = Color.White.copy(alpha = 0.08f)
+                        ),
+                        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.15f))
                     ) {
-                        Text("Image Spacing")
-                        Text("${settings.imageSpacing.roundToInt()}px")
-                    }
-                    Slider(
-                        value = settings.imageSpacing,
-                        onValueChange = {
-                            onUpdateSettings(settings.copy(imageSpacing = it))
-                        },
-                        valueRange = 0f..100f,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-
-                // Quick layout buttons
-                if (settings.collageImages.isNotEmpty()) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        AssistChip(
-                            onClick = {
-                                // Arrange in grid
-                                val images = settings.collageImages.mapIndexed { index, image ->
-                                    val row = index / 3
-                                    val col = index % 3
-                                    image.copy(
-                                        x = 0.05f + col * 0.3f,
-                                        y = 0.05f + row * 0.3f,
-                                        width = 0.25f,
-                                        height = 0.25f,
-                                        rotation = 0f
+                        Column(
+                            modifier = Modifier.padding(12.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            // Title/Toggle
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        imageVector = Icons.Default.DragHandle,
+                                        contentDescription = "Drag Handle",
+                                        tint = Color.White.copy(alpha = 0.6f),
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        text = if (selectedImage != null) "Edit Selected Photo" else "Canvas Background",
+                                        style = MaterialTheme.typography.labelMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color.White
                                     )
                                 }
-                                onUpdateSettings(settings.copy(collageImages = images))
-                            },
-                            label = { Text("Grid") }
-                        )
-                        AssistChip(
-                            onClick = {
-                                // Arrange in circle
-                                val images = settings.collageImages.mapIndexed { index, image ->
-                                    val total = settings.collageImages.size
-                                    val angle = (index * 360f / total) * (Math.PI / 180).toFloat()
-                                    val radius = 0.3f
-                                    image.copy(
-                                        x = 0.5f + radius * kotlin.math.cos(angle) - image.width / 2,
-                                        y = 0.5f + radius * kotlin.math.sin(angle) - image.height / 2,
-                                        rotation = angle * (180 / Math.PI).toFloat()
-                                    )
+
+                                if (selectedImage == null) {
+                                    // BG type selector
+                                    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                        BackgroundType.entries.filter { it != BackgroundType.COLLAGE }
+                                            .forEach { type ->
+                                                FilterChip(
+                                                    selected = settings.backgroundType == type,
+                                                    onClick = {
+                                                        onUpdateSettings(
+                                                            settings.copy(
+                                                                backgroundType = type
+                                                            )
+                                                        )
+                                                    },
+                                                    label = {
+                                                        Text(
+                                                            type.name,
+                                                            fontSize = 10.sp,
+                                                            color = Color.White
+                                                        )
+                                                    },
+                                                    modifier = Modifier.height(28.dp),
+                                                    colors = FilterChipDefaults.filterChipColors(
+                                                        selectedContainerColor = MaterialTheme.colorScheme.primary,
+                                                        selectedLabelColor = Color.White
+                                                    )
+                                                )
+                                            }
+                                    }
                                 }
-                                onUpdateSettings(settings.copy(collageImages = images))
-                            },
-                            label = { Text("Circle") }
-                        )
-                        AssistChip(
-                            onClick = {
-                                // Random arrangement
-                                val images = settings.collageImages.map { image ->
-                                    image.copy(
-                                        x = (0..70).random() / 100f,
-                                        y = (0..70).random() / 100f,
-                                        rotation = (0..360).random().toFloat(),
-                                        opacity = (50..100).random() / 100f
-                                    )
+                            }
+
+                            HorizontalDivider(color = Color.White.copy(alpha = 0.1f))
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                if (selectedImage != null) {
+                                    val img = selectedImage!!
+                                    // Image Editing Options
+                                    Row(
+                                        modifier = Modifier.weight(1f),
+                                        horizontalArrangement = Arrangement.SpaceEvenly,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        // Rotate 90
+                                        IconButton(onClick = {
+                                            val updated =
+                                                img.copy(rotation = (img.rotation + 90f) % 360f)
+                                            updateImage(updated, settings, onUpdateSettings)
+                                            selectedImage = updated
+                                        }) {
+                                            Icon(
+                                                Icons.Default.RotateRight,
+                                                contentDescription = "Rotate 90",
+                                                tint = Color.White
+                                            )
+                                        }
+
+                                        // Scale Type Cycle
+                                        IconButton(onClick = {
+                                            val newScale = when (img.scaleType) {
+                                                ScaleType.CENTER_CROP -> ScaleType.CENTER_INSIDE
+                                                ScaleType.CENTER_INSIDE -> ScaleType.FIT_CENTER
+                                                ScaleType.FIT_CENTER -> ScaleType.ORIGINAL
+                                                ScaleType.ORIGINAL -> ScaleType.CENTER_CROP
+                                            }
+                                            val updated = img.copy(scaleType = newScale)
+                                            updateImage(updated, settings, onUpdateSettings)
+                                            selectedImage = updated
+                                        }) {
+                                            Icon(
+                                                Icons.Default.AspectRatio,
+                                                contentDescription = "Scale Mode",
+                                                tint = Color.White
+                                            )
+                                        }
+
+                                        // Opacity Controls
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                        ) {
+                                            IconButton(
+                                                onClick = {
+                                                    val updated = img.copy(
+                                                        opacity = (img.opacity - 0.1f).coerceIn(
+                                                            0.1f,
+                                                            1f
+                                                        )
+                                                    )
+                                                    updateImage(updated, settings, onUpdateSettings)
+                                                    selectedImage = updated
+                                                },
+                                                modifier = Modifier.size(32.dp)
+                                            ) {
+                                                Icon(
+                                                    Icons.Default.RemoveCircleOutline,
+                                                    contentDescription = "Dim",
+                                                    tint = Color.White
+                                                )
+                                            }
+                                            Text(
+                                                "${(img.opacity * 10).roundToInt()}",
+                                                fontSize = 12.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = Color.White
+                                            )
+                                            IconButton(
+                                                onClick = {
+                                                    val updated = img.copy(
+                                                        opacity = (img.opacity + 0.1f).coerceIn(
+                                                            0.1f,
+                                                            1f
+                                                        )
+                                                    )
+                                                    updateImage(updated, settings, onUpdateSettings)
+                                                    selectedImage = updated
+                                                },
+                                                modifier = Modifier.size(32.dp)
+                                            ) {
+                                                Icon(
+                                                    Icons.Default.AddCircleOutline,
+                                                    contentDescription = "Brighten",
+                                                    tint = Color.White
+                                                )
+                                            }
+                                        }
+
+                                        // Layer Z-Index Up
+                                        IconButton(onClick = {
+                                            val maxZ =
+                                                settings.collageImages.maxOfOrNull { it.zIndex }
+                                                    ?: 0
+                                            val updated = img.copy(zIndex = maxZ + 1)
+                                            updateImage(updated, settings, onUpdateSettings)
+                                            selectedImage = updated
+                                        }) {
+                                            Icon(
+                                                Icons.Default.Layers,
+                                                contentDescription = "Bring to Front",
+                                                tint = Color.White
+                                            )
+                                        }
+
+                                        // Delete
+                                        IconButton(onClick = {
+                                            val updatedList =
+                                                settings.collageImages.filter { it.uri != img.uri }
+                                            onUpdateSettings(settings.copy(collageImages = updatedList))
+                                            selectedImage = null
+                                        }) {
+                                            Icon(
+                                                Icons.Default.Delete,
+                                                contentDescription = "Delete Photo",
+                                                tint = MaterialTheme.colorScheme.error
+                                            )
+                                        }
+                                    }
+                                } else {
+                                    // Canvas Background options inside floating bar
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        when (settings.backgroundType) {
+                                            BackgroundType.SOLID -> {
+                                                Text(
+                                                    "Solid Color:",
+                                                    fontSize = 12.sp,
+                                                    color = Color.White.copy(alpha = 0.7f)
+                                                )
+                                                Box(
+                                                    modifier = Modifier
+                                                        .size(36.dp)
+                                                        .clip(CircleShape)
+                                                        .background(Color(settings.backgroundColor))
+                                                        .border(2.dp, Color.White, CircleShape)
+                                                        .clickable {
+                                                            showColorPickerTarget = "bg_color"
+                                                        }
+                                                )
+                                            }
+
+                                            BackgroundType.GRADIENT -> {
+                                                Text(
+                                                    "Gradient Start/End:",
+                                                    fontSize = 12.sp,
+                                                    color = Color.White.copy(alpha = 0.7f)
+                                                )
+                                                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                                                    Box(
+                                                        modifier = Modifier
+                                                            .size(36.dp)
+                                                            .clip(CircleShape)
+                                                            .background(Color(settings.gradientStartColor))
+                                                            .border(2.dp, Color.White, CircleShape)
+                                                            .clickable {
+                                                                showColorPickerTarget = "grad_start"
+                                                            }
+                                                    )
+                                                    Box(
+                                                        modifier = Modifier
+                                                            .size(36.dp)
+                                                            .clip(CircleShape)
+                                                            .background(Color(settings.gradientEndColor))
+                                                            .border(2.dp, Color.White, CircleShape)
+                                                            .clickable {
+                                                                showColorPickerTarget = "grad_end"
+                                                            }
+                                                    )
+                                                }
+                                            }
+
+                                            BackgroundType.IMAGE -> {
+                                                Text(
+                                                    "Single background image is active.",
+                                                    fontSize = 12.sp,
+                                                    color = Color.White.copy(alpha = 0.7f)
+                                                )
+                                            }
+
+                                            else -> {}
+                                        }
+                                    }
                                 }
-                                onUpdateSettings(settings.copy(collageImages = images))
-                            },
-                            label = { Text("Random") }
-                        )
+                            }
+                        }
                     }
                 }
             }
         }
-
-        // Collage preview/editor
-        Box(
+    } else {
+        // Normal configuration screen view
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .height(400.dp)
-                .background(
-                    Color(settings.backgroundColor),
-                    RoundedCornerShape(16.dp)
-                )
-                .border(2.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(16.dp))
-                .clip(RoundedCornerShape(16.dp))
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            if (settings.collageImages.isEmpty()) {
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Icon(
-                        Icons.Default.PhotoLibrary,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(64.dp)
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
+            // Header with actions
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
                     Text(
-                        text = "No images in collage",
+                        text = "Image Collage",
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = "${settings.collageImages.size} images added",
+                        style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Tap 'Add Images' to create your collage",
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                        fontSize = 14.sp
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
+                }
+
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    IconButton(
+                        onClick = {
+                            if (settings.collageImages.isEmpty()) {
+                                showAddImagesToast(context)
+                            } else {
+                                showLayoutOptions = true
+                            }
+                        },
+                        modifier = Modifier.size(40.dp)
+                    ) {
+                        Icon(Icons.Default.AutoAwesomeMosaic, contentDescription = "Layout")
+                    }
+                    IconButton(
+                        onClick = {
+                            if (settings.collageImages.isEmpty()) {
+                                showAddImagesToast(context)
+                            } else {
+                                showBatchEditor = true
+                            }
+                        },
+                        modifier = Modifier.size(40.dp)
+                    ) {
+                        Icon(Icons.Default.Tune, contentDescription = "Batch Edit")
+                    }
                     FilledTonalButton(
                         onClick = { showImagePicker = true }
                     ) {
-                        Text("Select Photos")
+                        Icon(Icons.Default.AddPhotoAlternate, contentDescription = null)
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = "Add Images",
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
                     }
                 }
-            } else {
-                // Draw collage preview with interactivity
-                settings.collageImages.sortedBy { it.zIndex }.forEach { image ->
-                    InteractiveCollageImage(
-                        image = image,
-                        settings = settings,
-                        isSelected = selectedImage?.uri == image.uri,
-                        onClick = { selectedImage = image },
-                        onUpdate = { updatedImage ->
-                            val updatedList = settings.collageImages.map {
-                                if (it.uri == updatedImage.uri) updatedImage else it
-                            }
-                            onUpdateSettings(settings.copy(collageImages = updatedList))
-                        },
-                        onRemove = {
-                            val updatedList = settings.collageImages.filter { it.uri != image.uri }
-                            onUpdateSettings(settings.copy(collageImages = updatedList))
-                            if (selectedImage?.uri == image.uri) {
-                                selectedImage = null
-                            }
+            }
+
+            // Full screen editor card trigger
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        // Reset floating bar offset when entering full screen
+                        barOffsetX = 0f
+                        barOffsetY = 0f
+                        isFullScreen = true
+                    },
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f)
+                ),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
+            ) {
+                Row(
+                    modifier = Modifier.padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Fullscreen,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(28.dp)
+                        )
+                        Column {
+                            Text(
+                                text = "Open Full Screen Designer",
+                                fontWeight = FontWeight.Bold,
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                            Text(
+                                text = "Drag, zoom, rotate, and arrange images freely.",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                         }
+                    }
+                    Icon(
+                        imageVector = Icons.Default.ChevronRight,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary
                     )
                 }
             }
-        }
 
-        // Image list for quick selection
-        if (settings.collageImages.isNotEmpty()) {
+            // Quick controls
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainer
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerLow
                 )
             ) {
                 Column(
                     modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            "Images (${settings.collageImages.size})",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold
-                        )
-                        IconButton(
-                            onClick = {
-                                if (settings.collageImages.isEmpty()) {
-                                    showAddImagesToast(context)
-                                } else {
-                                    onUpdateSettings(settings.copy(collageImages = emptyList()))
-                                    selectedImage = null
-                                }
-                            }
+                    Text(
+                        text = "Global Collage Settings",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Icon(Icons.Default.DeleteSweep, contentDescription = "Clear All")
+                            Text("Collage Opacity")
+                            Text("${(settings.collageOpacity * 100).roundToInt()}%")
+                        }
+                        Slider(
+                            value = settings.collageOpacity,
+                            onValueChange = {
+                                onUpdateSettings(settings.copy(collageOpacity = it))
+                            },
+                            valueRange = 0f..1f,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text("Image Spacing (Automatic Layouts)")
+                            Text("${settings.imageSpacing.roundToInt()}px")
+                        }
+                        Slider(
+                            value = settings.imageSpacing,
+                            onValueChange = {
+                                onUpdateSettings(settings.copy(imageSpacing = it))
+                            },
+                            valueRange = 0f..100f,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+
+                    // Quick layout chips
+                    if (settings.collageImages.isNotEmpty()) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            AssistChip(
+                                onClick = {
+                                    applyLayout(CollageLayout.GRID, settings, onUpdateSettings)
+                                },
+                                label = { Text("Grid") }
+                            )
+                            AssistChip(
+                                onClick = {
+                                    applyLayout(
+                                        CollageLayout.CENTER_FOCUS,
+                                        settings,
+                                        onUpdateSettings
+                                    )
+                                },
+                                label = { Text("Center Focus") }
+                            )
+                            AssistChip(
+                                onClick = {
+                                    applyLayout(CollageLayout.RANDOM, settings, onUpdateSettings)
+                                },
+                                label = { Text("Random") }
+                            )
+                        }
+                    }
+                }
+            }
+
+            // Collage preview/editor
+            BoxWithConstraints(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(360.dp)
+                    .background(
+                        Color(settings.backgroundColor),
+                        RoundedCornerShape(16.dp)
+                    )
+                    .border(2.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(16.dp))
+                    .clip(RoundedCornerShape(16.dp))
+            ) {
+                val containerWidth = maxWidth
+                val containerHeight = maxHeight
+
+                if (settings.collageImages.isEmpty()) {
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Icon(
+                            Icons.Default.PhotoLibrary,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(64.dp)
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = "No images in collage",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Tap 'Add Images' to create your collage",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                            fontSize = 14.sp
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        FilledTonalButton(
+                            onClick = { showImagePicker = true }
+                        ) {
+                            Text("Select Photos")
+                        }
+                    }
+                } else {
+                    // Render background
+                    if (settings.backgroundType == BackgroundType.GRADIENT) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(
+                                    Brush.linearGradient(
+                                        colors = listOf(
+                                            Color(settings.gradientStartColor),
+                                            Color(settings.gradientEndColor)
+                                        )
+                                    )
+                                )
+                        )
+                    } else if (settings.backgroundType == BackgroundType.IMAGE) {
+                        settings.backgroundImageUri?.let { uri ->
+                            Box(modifier = Modifier.fillMaxSize()) {
+                                coil.compose.AsyncImage(
+                                    model = uri,
+                                    contentDescription = null,
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                                )
+                            }
                         }
                     }
 
-                    // Horizontal scrollable image list
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(80.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        settings.collageImages.forEach { image ->
-                            ImageThumbnail(
+                    // Render interactive collage items inside bounds
+                    settings.collageImages.sortedBy { it.zIndex }.forEach { image ->
+                        key(image.uri) {
+                            InteractiveCollageImage(
                                 image = image,
+                                settings = settings,
                                 isSelected = selectedImage?.uri == image.uri,
+                                containerWidth = containerWidth,
+                                containerHeight = containerHeight,
                                 onClick = { selectedImage = image },
-                                onRemove = {
-                                    val updatedList = settings.collageImages.filter { it.uri != image.uri }
+                                onUpdate = { updatedImage ->
+                                    val updatedList = settings.collageImages.map {
+                                        if (it.uri == updatedImage.uri) updatedImage else it
+                                    }
                                     onUpdateSettings(settings.copy(collageImages = updatedList))
+                                    if (selectedImage?.uri == image.uri) {
+                                        selectedImage = updatedImage
+                                    }
+                                },
+                                onRemove = {
+                                    val updatedList =
+                                        settings.collageImages.filter { it.uri != image.uri }
+                                    onUpdateSettings(settings.copy(collageImages = updatedList))
+                                    if (selectedImage?.uri == image.uri) {
+                                        selectedImage = null
+                                    }
                                 }
                             )
                         }
                     }
                 }
             }
-        }
 
-        // Selected image controls
-        selectedImage?.let { image ->
-            AnimatedVisibility(
-                visible = selectedImage != null,
-                enter = fadeIn() + expandVertically(),
-                exit = fadeOut() + shrinkVertically()
-            ) {
+            // Image list for quick selection
+            if (settings.collageImages.isNotEmpty()) {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(
@@ -456,7 +900,7 @@ fun CollageScreen(
                 ) {
                     Column(
                         modifier = Modifier.padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -464,147 +908,69 @@ fun CollageScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "Edit Image",
+                                "Images (${settings.collageImages.size})",
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold
                             )
-                            Row {
-                                IconButton(
-                                    onClick = {
-                                        // Bring to front
-                                        val maxZ = settings.collageImages.maxOfOrNull { it.zIndex } ?: 0
-                                        val updated = image.copy(zIndex = maxZ + 1)
-                                        updateImage(updated, settings, onUpdateSettings)
-                                        selectedImage = updated
-                                    }
-                                ) {
-                                    Icon(Icons.Default.Layers, contentDescription = "To Front")
-                                }
-                                IconButton(
-                                    onClick = {
-                                        val updatedList = settings.collageImages.filter { it.uri != image.uri }
-                                        onUpdateSettings(settings.copy(collageImages = updatedList))
+                            IconButton(
+                                onClick = {
+                                    if (settings.collageImages.isEmpty()) {
+                                        showAddImagesToast(context)
+                                    } else {
+                                        onUpdateSettings(settings.copy(collageImages = emptyList()))
                                         selectedImage = null
                                     }
-                                ) {
-                                    Icon(Icons.Default.Delete, contentDescription = "Remove")
                                 }
-                            }
-                        }
-
-                        // Basic controls
-                        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text("Opacity")
-                                Text("${(image.opacity * 100).roundToInt()}%")
+                                Icon(Icons.Default.DeleteSweep, contentDescription = "Clear All")
                             }
-                            Slider(
-                                value = image.opacity,
-                                onValueChange = {
-                                    val updated = image.copy(opacity = it)
-                                    updateImage(updated, settings, onUpdateSettings)
-                                    selectedImage = updated
-                                },
-                                valueRange = 0f..1f
-                            )
                         }
 
-                        // Size controls
+                        // Horizontal scrollable image list
                         Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(16.dp)
-                        ) {
-                            Column(
-                                modifier = Modifier.weight(1f),
-                                verticalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                Text("Width", style = MaterialTheme.typography.bodyMedium)
-                                Slider(
-                                    value = image.width,
-                                    onValueChange = {
-                                        val updated = image.copy(width = it)
-                                        updateImage(updated, settings, onUpdateSettings)
-                                        selectedImage = updated
-                                    },
-                                    valueRange = 0.1f..0.8f
-                                )
-                            }
-                            Column(
-                                modifier = Modifier.weight(1f),
-                                verticalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                Text("Height", style = MaterialTheme.typography.bodyMedium)
-                                Slider(
-                                    value = image.height,
-                                    onValueChange = {
-                                        val updated = image.copy(height = it)
-                                        updateImage(updated, settings, onUpdateSettings)
-                                        selectedImage = updated
-                                    },
-                                    valueRange = 0.1f..0.8f
-                                )
-                            }
-                        }
-
-                        // Scale type selector
-                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Text("Scale Type", style = MaterialTheme.typography.bodyMedium)
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                ScaleType.entries.forEach { scaleType ->
-                                    FilterChip(
-                                        selected = image.scaleType == scaleType,
-                                        onClick = {
-                                            val updated = image.copy(scaleType = scaleType)
-                                            updateImage(updated, settings, onUpdateSettings)
-                                            selectedImage = updated
-                                        },
-                                        label = { Text(scaleType.name.replace('_', ' '), maxLines = 2, overflow = TextOverflow.Ellipsis) },
-                                        modifier = Modifier.weight(1f)
-                                    )
-                                }
-                            }
-                        }
-
-                        // Quick actions
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(80.dp),
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            FilledTonalButton(
-                                onClick = {
-                                    val updated = image.copy(rotation = (image.rotation + 90) % 360)
-                                    updateImage(updated, settings, onUpdateSettings)
-                                    selectedImage = updated
-                                },
-                                modifier = Modifier.weight(1f)
-                            ) {
-                                Icon(Icons.Default.Rotate90DegreesCcw, contentDescription = null)
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text("Rotate 90°")
-                            }
-                            FilledTonalButton(
-                                onClick = {
-                                    val updated = image.copy(opacity = if (image.opacity > 0.5f) 0.3f else 1f)
-                                    updateImage(updated, settings, onUpdateSettings)
-                                    selectedImage = updated
-                                },
-                                modifier = Modifier.weight(1f)
-                            ) {
-                                Icon(Icons.Default.Visibility, contentDescription = null)
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text("Toggle Dim")
+                            settings.collageImages.forEach { image ->
+                                ImageThumbnail(
+                                    image = image,
+                                    isSelected = selectedImage?.uri == image.uri,
+                                    onClick = { selectedImage = image },
+                                    onRemove = {
+                                        val updatedList =
+                                            settings.collageImages.filter { it.uri != image.uri }
+                                        onUpdateSettings(settings.copy(collageImages = updatedList))
+                                    }
+                                )
                             }
                         }
                     }
                 }
             }
+        }
+    }
+
+    // Color Picker Dialog overlay
+    showColorPickerTarget?.let { target ->
+        AdvancedColorPickerDialog(
+            initial = when (target) {
+                "bg_color" -> Color(settings.backgroundColor)
+                "grad_start" -> Color(settings.gradientStartColor)
+                "grad_end" -> Color(settings.gradientEndColor)
+                else -> Color.White
+            },
+            onDismiss = { showColorPickerTarget = null }
+        ) { color ->
+            val updated = when (target) {
+                "bg_color" -> settings.copy(backgroundColor = color.toArgb())
+                "grad_start" -> settings.copy(gradientStartColor = color.toArgb())
+                "grad_end" -> settings.copy(gradientEndColor = color.toArgb())
+                else -> settings
+            }
+            onUpdateSettings(updated)
+            showColorPickerTarget = null
         }
     }
 
@@ -633,14 +999,16 @@ fun CollageScreen(
                             Row(
                                 modifier = Modifier.padding(16.dp),
                                 verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                horizontalArrangement = Arrangement.spacedBy(
+                                    12.dp
+                                )
                             ) {
                                 Icon(
                                     when (layout) {
                                         CollageLayout.GRID -> Icons.Default.GridView
                                         CollageLayout.MASONRY -> Icons.Default.ViewDay
                                         CollageLayout.CENTER_FOCUS -> Icons.Default.CenterFocusStrong
-                                        CollageLayout.SPIRAL -> Icons.Default.CompareArrows
+                                        CollageLayout.SPIRAL -> Icons.Default.Sync
                                         CollageLayout.RANDOM -> Icons.Default.Shuffle
                                     },
                                     contentDescription = null
@@ -684,7 +1052,8 @@ fun CollageScreen(
                         Slider(
                             value = settings.collageImages.map { it.opacity }.average().toFloat(),
                             onValueChange = { newOpacity ->
-                                val updatedImages = settings.collageImages.map { it.copy(opacity = newOpacity) }
+                                val updatedImages =
+                                    settings.collageImages.map { it.copy(opacity = newOpacity) }
                                 onUpdateSettings(settings.copy(collageImages = updatedImages))
                             },
                             valueRange = 0f..1f
@@ -701,7 +1070,8 @@ fun CollageScreen(
                                 FilterChip(
                                     selected = settings.collageImages.all { it.scaleType == scaleType },
                                     onClick = {
-                                        val updatedImages = settings.collageImages.map { it.copy(scaleType = scaleType) }
+                                        val updatedImages =
+                                            settings.collageImages.map { it.copy(scaleType = scaleType) }
                                         onUpdateSettings(settings.copy(collageImages = updatedImages))
                                     },
                                     label = { Text(scaleType.name.first().toString()) },
@@ -730,201 +1100,6 @@ fun CollageScreen(
         LaunchedEffect(showImagePicker) {
             imagePicker.launch("image/*")
             showImagePicker = false
-        }
-    }
-}
-
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-private fun InteractiveCollageImage(
-    image: CollageImage,
-    settings: WallpaperSettings,
-    isSelected: Boolean,
-    onClick: () -> Unit,
-    onUpdate: (CollageImage) -> Unit,
-    onRemove: () -> Unit
-) {
-    var offsetX by remember { mutableStateOf(image.x) }
-    var offsetY by remember { mutableStateOf(image.y) }
-    var scale by remember { mutableStateOf(1f) }
-    var rotation by remember { mutableStateOf(image.rotation) }
-
-    val context = LocalContext.current
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .pointerInput(Unit) {
-                detectTransformGestures(
-                    onGesture = { centroid, pan, gestureScale, gestureRotation ->
-                        val newScale = (scale * gestureScale).coerceIn(0.5f, 3f)
-                        val newRotation = (rotation + gestureRotation) % 360
-
-                        // Calculate position change
-                        val deltaX = pan.x / 400f // 400 is preview width
-                        val deltaY = pan.y / 400f // 400 is preview height
-
-                        val newX = (offsetX + deltaX).coerceIn(0f, 1f - image.width * newScale)
-                        val newY = (offsetY + deltaY).coerceIn(0f, 1f - image.height * newScale)
-
-                        if (newX != offsetX || newY != offsetY || newScale != scale || newRotation != rotation) {
-                            offsetX = newX
-                            offsetY = newY
-                            scale = newScale
-                            rotation = newRotation
-
-                            val updated = image.copy(
-                                x = offsetX,
-                                y = offsetY,
-                                width = image.width * scale,
-                                height = image.height * scale,
-                                rotation = rotation
-                            )
-                            onUpdate(updated)
-                        }
-                    }
-                )
-            }
-    ) {
-        Box(
-            modifier = Modifier
-                .offset(
-                    x = (offsetX * 400).dp,
-                    y = (offsetY * 400).dp
-                )
-                .size(
-                    width = (image.width * 400 * scale).dp,
-                    height = (image.height * 400 * scale).dp
-                )
-                .rotate(rotation)
-                .combinedClickable(
-                    onClick = onClick,
-                    onLongClick = onRemove
-                )
-                .border(
-                    if (isSelected) 3.dp else 1.dp,
-                    if (isSelected) MaterialTheme.colorScheme.primary
-                    else Color.White.copy(alpha = image.opacity * 0.5f),
-                    RoundedCornerShape(4.dp)
-                )
-        ) {
-            AsyncImage(
-                model = ImageRequest.Builder(context)
-                    .data(image.uri)
-                    .crossfade(true)
-                    .build(),
-                contentDescription = "Collage image",
-                modifier = Modifier.fillMaxSize(),
-                contentScale = when (image.scaleType) {
-                    ScaleType.CENTER_CROP -> ContentScale.Crop
-                    ScaleType.CENTER_INSIDE -> ContentScale.Inside
-                    ScaleType.FIT_CENTER -> ContentScale.Fit
-                    ScaleType.ORIGINAL -> ContentScale.None
-                },
-                alpha = image.opacity
-            )
-
-            if (isSelected) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.Black.copy(alpha = 0.2f))
-                )
-
-                // Selection handles
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .offset((-8).dp, (-8).dp)
-                        .size(24.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primary)
-                        .border(2.dp, Color.White, CircleShape)
-                        .clickable {
-                            val updated = image.copy(rotation = (image.rotation + 45) % 360)
-                            onUpdate(updated)
-                        }
-                ) {
-                    Icon(
-                        Icons.Default.RotateRight,
-                        contentDescription = "Rotate",
-                        tint = Color.White,
-                        modifier = Modifier.size(16.dp)
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun ImageThumbnail(
-    image: CollageImage,
-    isSelected: Boolean,
-    onClick: () -> Unit,
-    onRemove: () -> Unit
-) {
-    val context = LocalContext.current
-
-    Box(
-        modifier = Modifier
-            .size(80.dp)
-            .clip(RoundedCornerShape(8.dp))
-            .border(
-                2.dp,
-                if (isSelected) MaterialTheme.colorScheme.primary
-                else Color.Transparent,
-                RoundedCornerShape(8.dp)
-            )
-            .clickable { onClick() }
-    ) {
-        AsyncImage(
-            model = ImageRequest.Builder(context)
-                .data(image.uri)
-                .size(80)
-                .crossfade(true)
-                .build(),
-            contentDescription = "Thumbnail",
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop
-        )
-
-        // Opacity indicator
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.5f * (1 - image.opacity)))
-        )
-
-        // Remove button
-        IconButton(
-            onClick = onRemove,
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .size(20.dp)
-        ) {
-            Icon(
-                Icons.Default.Close,
-                contentDescription = "Remove",
-                tint = Color.White,
-                modifier = Modifier.size(16.dp)
-            )
-        }
-
-        // Z-index indicator
-        Box(
-            modifier = Modifier
-                .align(Alignment.BottomStart)
-                .padding(4.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.8f))
-                .padding(horizontal = 6.dp, vertical = 2.dp)
-        ) {
-            Text(
-                text = "${image.zIndex}",
-                color = Color.White,
-                fontSize = 10.sp
-            )
         }
     }
 }
@@ -958,6 +1133,7 @@ private fun applyLayout(
                     rotation = 0f
                 )
             }
+
             CollageLayout.MASONRY -> {
                 val positions = listOf(
                     Pair(0.05f, 0.05f) to Pair(0.45f, 0.25f),
@@ -976,6 +1152,7 @@ private fun applyLayout(
                     rotation = (index * 5f) % 15f
                 )
             }
+
             CollageLayout.CENTER_FOCUS -> {
                 if (index == 0) {
                     image.copy(
@@ -986,7 +1163,8 @@ private fun applyLayout(
                         rotation = 0f
                     )
                 } else {
-                    val angle = ((index - 1) * 360f / (settings.collageImages.size - 1)) * (Math.PI / 180).toFloat()
+                    val angle =
+                        ((index - 1) * 360f / (settings.collageImages.size - 1)) * (Math.PI / 180).toFloat()
                     val radius = 0.35f
                     image.copy(
                         x = 0.5f + radius * kotlin.math.cos(angle) - 0.1f,
@@ -997,6 +1175,7 @@ private fun applyLayout(
                     )
                 }
             }
+
             CollageLayout.SPIRAL -> {
                 val angle = index * 0.5f
                 val radius = 0.1f + index * 0.03f
@@ -1008,6 +1187,7 @@ private fun applyLayout(
                     rotation = angle * (180 / Math.PI).toFloat() * 2
                 )
             }
+
             CollageLayout.RANDOM -> {
                 image.copy(
                     x = (0..70).random() / 100f,

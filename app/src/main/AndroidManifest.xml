@@ -4,6 +4,7 @@
 
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <application
+        android:name=".SajjaApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -23,7 +24,41 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <service android:name=".RomanClockWallpaperService"
+        <service android:name=".domain.services.RomanClockWallpaperService"
+            android:label="Roman Clock Wallpaper"
+            android:permission="android.permission.BIND_WALLPAPER"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.service.wallpaper.WallpaperService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.service.wallpaper"
+                android:resource="@xml/wallpaper" />
+        </service>
+        <service android:name=".domain.services.ArabicClockWallpaperService"
+            android:label="Arabic Clock Wallpaper"
+            android:permission="android.permission.BIND_WALLPAPER"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.service.wallpaper.WallpaperService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.service.wallpaper"
+                android:resource="@xml/wallpaper" />
+        </service>
+        <service android:name=".domain.services.DigitalClockWallpaperService"
+            android:label="Digital Clock Wallpaper"
+            android:permission="android.permission.BIND_WALLPAPER"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.service.wallpaper.WallpaperService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.service.wallpaper"
+                android:resource="@xml/wallpaper" />
+        </service>
+        <service android:name=".domain.services.MinimalClockWallpaperService"
+            android:label="Minimalist Clock Wallpaper"
             android:permission="android.permission.BIND_WALLPAPER"
             android:exported="true">
             <intent-filter>
