@@ -14,9 +14,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.vng.sajja.domain.model.BackgroundType
+import com.vng.sajja.ui.LivePreview
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.foundation.border
+import androidx.compose.foundation.shape.RoundedCornerShape
 import com.vng.sajja.ui.components.AdvancedColorPickerDialog
 import com.vng.sajja.ui.components.ColorOptionCard
 import com.vng.sajja.ui.components.GlassmorphicCard
@@ -30,6 +36,7 @@ import java.util.UUID
 @Composable
 fun BackgroundSettingsScreen(
     viewModel: SettingsViewModel,
+    isVisible: Boolean,
     modifier: Modifier = Modifier
 ) {
     val settings by viewModel.settings.collectAsState()
@@ -54,8 +61,37 @@ fun BackgroundSettingsScreen(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-            GlassmorphicCard(modifier = Modifier.fillMaxWidth()) {
-                Text("Background Type", style = MaterialTheme.typography.titleMedium)
+        // Live Clock Preview Card
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(
+                text = "Live Clock Preview",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(260.dp)
+                    .clip(RoundedCornerShape(20.dp))
+                    .border(
+                        width = 1.dp,
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+                        shape = RoundedCornerShape(20.dp)
+                    )
+                    .shadow(
+                        elevation = 8.dp,
+                        shape = RoundedCornerShape(20.dp),
+                        spotColor = MaterialTheme.colorScheme.primary
+                    )
+            ) {
+                LivePreview(settings = settings, isVisible = isVisible)
+            }
+        }
+
+        GlassmorphicCard(modifier = Modifier.fillMaxWidth()) {
+            Text("Background Type", style = MaterialTheme.typography.titleMedium)
                 Spacer(modifier = Modifier.height(12.dp))
 
 // Note: BackgroundType.entries loop inside BackgroundSettingsScreen

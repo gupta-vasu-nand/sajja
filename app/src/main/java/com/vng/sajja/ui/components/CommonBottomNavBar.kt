@@ -8,15 +8,12 @@ import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
-import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.compose.ui.text.style.TextOverflow
 import com.vng.sajja.ui.theme.getContrastingTextColor
 
@@ -37,12 +34,10 @@ object BottomNavBarItems {
 @Composable
 fun CommonBottomNavBar(
     modifier: Modifier = Modifier,
-    navController: NavController
+    selectedTab: Int,
+    onTabSelected: (Int) -> Unit
 ) {
     val navItems = BottomNavBarItems.items
-
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route
 
     val containerColor = MaterialTheme.colorScheme.surfaceContainer
     val contrastColor = getContrastingTextColor(containerColor)
@@ -66,7 +61,7 @@ fun CommonBottomNavBar(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 navItems.forEachIndexed { index, item ->
-                    val isSelected = currentRoute == item.route
+                    val isSelected = selectedTab == index
 
                     NavigationBarItem(
                         modifier = Modifier
@@ -74,21 +69,7 @@ fun CommonBottomNavBar(
                             .padding(2.dp),
                         alwaysShowLabel = true,
                         selected = isSelected,
-                        onClick = {
-                            if (currentRoute != item.route) {
-                                if (item.route == "dashboard") {
-                                    navController.popBackStack("dashboard", false)
-                                } else {
-                                    navController.navigate(item.route) {
-                                        popUpTo("dashboard") {
-                                            saveState = true
-                                        }
-                                        launchSingleTop = true
-                                        restoreState = true
-                                    }
-                                }
-                            }
-                        },
+                        onClick = { onTabSelected(index) },
                         icon = {
                             Column(
                                 horizontalAlignment = Alignment.CenterHorizontally,

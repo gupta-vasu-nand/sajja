@@ -33,10 +33,16 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
+import androidx.navigation.compose.rememberNavController
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import kotlinx.coroutines.launch
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
+import com.vng.sajja.domain.model.ClockPosition
 import com.vng.sajja.domain.model.ClockType
 import com.vng.sajja.domain.services.RomanClockWallpaperService
 import com.vng.sajja.domain.services.ArabicClockWallpaperService
@@ -63,15 +69,25 @@ fun MainScreen(
 
     var fabExpanded by remember { mutableStateOf(false) }
 
-    val title = when (currentRoute) {
-        "dashboard" -> "Sajja Clock Customizer"
-        "background_settings" -> "Background Settings"
-        "clock_settings" -> "Clock Face Settings"
-        "theme_settings" -> "Color & Presets"
-        "tools_settings" -> "Backup & Tools"
-        "app_settings" -> "App Preferences"
-        "animation_manager" -> "Animation Manager"
-        else -> "Sajja Customizer"
+    val pagerState = rememberPagerState(pageCount = { 3 })
+    val coroutineScope = rememberCoroutineScope()
+
+    val title = if (currentRoute == "dashboard") {
+        when (pagerState.currentPage) {
+            0 -> "Sajja Clock Customizer"
+            1 -> "Clock Face Settings"
+            2 -> "Background Settings"
+            else -> "Sajja Customizer"
+        }
+    } else {
+        when (currentRoute) {
+            "theme_settings" -> "Color & Presets"
+            "tools_settings" -> "Backup & Tools"
+            "app_settings" -> "App Preferences"
+            "animation_manager" -> "Animation Manager"
+            "animation_builder" -> "Animation Builder"
+            else -> "Sajja Customizer"
+        }
     }
 
     val menuItems = listOf(
@@ -123,7 +139,16 @@ fun MainScreen(
             )
         },
         bottomBar = {
-            CommonBottomNavBar(navController = navController)
+            if (currentRoute == "dashboard") {
+                CommonBottomNavBar(
+                    selectedTab = pagerState.currentPage,
+                    onTabSelected = { index ->
+                        coroutineScope.launch {
+                            pagerState.animateScrollToPage(index)
+                        }
+                    }
+                )
+            }
         },
         floatingActionButton = {
             ExpandableFab(
@@ -153,6 +178,26 @@ fun MainScreen(
                     drawRect(brush = brush2)
                 }
         ) {
+            val navigateToTabOrRoute = { targetRoute: String ->
+                when (targetRoute) {
+                    "dashboard" -> {
+                        navController.popBackStack("dashboard", false)
+                        coroutineScope.launch { pagerState.animateScrollToPage(0) }
+                    }
+                    "clock_settings" -> {
+                        navController.popBackStack("dashboard", false)
+                        coroutineScope.launch { pagerState.animateScrollToPage(1) }
+                    }
+                    "background_settings" -> {
+                        navController.popBackStack("dashboard", false)
+                        coroutineScope.launch { pagerState.animateScrollToPage(2) }
+                    }
+                    else -> {
+                        navController.navigate(targetRoute)
+                    }
+                }
+            }
+
             NavHost(
                 navController = navController,
                 startDestination = "dashboard",
@@ -163,13 +208,23 @@ fun MainScreen(
                 popExitTransition = { fadeOut(animationSpec = tween(300)) + slideOutHorizontally(animationSpec = tween(300)) { it } }
             ) {
                 composable("dashboard") {
-                    DashboardScreen(viewModel = viewModel, navController = navController)
-                }
-                composable("background_settings") {
-                    BackgroundSettingsScreen(viewModel = viewModel)
-                }
-                composable("clock_settings") {
-                    ClockSettingsScreen(viewModel = viewModel)
+                    HorizontalPager(
+                        state = pagerState,
+                        modifier = Modifier.fillMaxSize()
+                    ) { page ->
+                        when (page) {
+                            0 -> DashboardScreen(
+                                viewModel = viewModel,
+                                isVisible = pagerState.currentPage == 0,
+                                onNavigate = { navigateToTabOrRoute(it) }
+                            )
+                            1 -> ClockSettingsScreen(viewModel = viewModel)
+                            2 -> BackgroundSettingsScreen(
+                                viewModel = viewModel,
+                                isVisible = pagerState.currentPage == 2
+                            )
+                        }
+                    }
                 }
 
                 composable("theme_settings") {
@@ -182,7 +237,19 @@ fun MainScreen(
                     AppSettingsScreen(viewModel = viewModel)
                 }
                 composable("animation_manager") {
-                    AnimationManagerScreen(viewModel = viewModel)
+                    AnimationManagerScreen(viewModel = viewModel, navController = navController)
+                }
+                composable(
+                    route = "animation_builder?presetId={presetId}",
+                    arguments = listOf(
+                        navArgument("presetId") {
+                            type = NavType.IntType
+                            defaultValue = -1
+                        }
+                    )
+                ) { backStackEntry ->
+                    val presetId = backStackEntry.arguments?.getInt("presetId") ?: -1
+                    AnimationBuilderScreen(viewModel = viewModel, navController = navController, presetId = presetId)
                 }
             }
 
@@ -216,7 +283,8 @@ data class CategoryItem(
 @Composable
 fun DashboardScreen(
     viewModel: SettingsViewModel,
-    navController: NavController
+    isVisible: Boolean,
+    onNavigate: (String) -> Unit
 ) {
     val settings by viewModel.settings.collectAsState()
 
@@ -252,7 +320,7 @@ fun DashboardScreen(
                         spotColor = MaterialTheme.colorScheme.primary
                     )
             ) {
-                LivePreview(settings = settings)
+                LivePreview(settings = settings, isVisible = isVisible)
             }
 
             // Quick Status bar
@@ -298,7 +366,7 @@ fun DashboardScreen(
                 title = item.title,
                 description = item.description,
                 icon = item.icon,
-                onClick = { navController.navigate(item.route) }
+                onClick = { onNavigate(item.route) }
             )
         }
     }

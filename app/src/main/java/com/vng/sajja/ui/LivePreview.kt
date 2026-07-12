@@ -12,24 +12,38 @@ import androidx.compose.ui.platform.LocalContext
 import com.vng.sajja.domain.model.WallpaperSettings
 import com.vng.sajja.ui.utils.ClockRenderer
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.Dispatchers
 import java.util.Calendar
+import kotlin.time.Duration.Companion.milliseconds
+import androidx.core.net.toUri
 
 @Composable
-fun LivePreview(settings: WallpaperSettings, modifier: Modifier = Modifier) {
-    var time by remember { mutableStateOf(Calendar.getInstance()) }
+fun LivePreview(
+    settings: WallpaperSettings,
+    isVisible: Boolean = true,
+    modifier: Modifier = Modifier
+) {
+    var tick by remember { mutableStateOf(System.currentTimeMillis()) }
     val context = LocalContext.current
     val bitmapCache = remember { mutableMapOf<String, Bitmap>() }
 
-    val isAnimated = settings.smoothSecondHand ||
+    val isAnimated = isVisible && (settings.smoothSecondHand ||
             settings.particleType != com.vng.sajja.domain.model.ParticleType.NONE ||
-            settings.digitalAnimType != com.vng.sajja.domain.model.DigitalAnimType.NONE
+            settings.digitalAnimType != com.vng.sajja.domain.model.DigitalAnimType.NONE)
 
     LaunchedEffect(isAnimated) {
-        while (true) {
-            time = Calendar.getInstance()
-            delay(if (isAnimated) 16 else 1000)
+        // Run timing tick on a background thread dispatcher to offload UI thread
+        withContext(Dispatchers.Default) {
+            while (true) {
+                tick = System.currentTimeMillis()
+                delay((if (isAnimated) 16 else 1000).milliseconds)
+            }
         }
     }
+
+    val time = remember { Calendar.getInstance() }
+    time.timeInMillis = tick
 
     DisposableEffect(Unit) {
         onDispose {
@@ -41,7 +55,7 @@ fun LivePreview(settings: WallpaperSettings, modifier: Modifier = Modifier) {
     val loadBitmap = remember(context) {
         { uriString: String ->
             bitmapCache[uriString] ?: try {
-                val uri = android.net.Uri.parse(uriString)
+                val uri = uriString.toUri()
                 val inputStream = context.contentResolver.openInputStream(uri)
                 val options = BitmapFactory.Options().apply {
                     inSampleSize = 2

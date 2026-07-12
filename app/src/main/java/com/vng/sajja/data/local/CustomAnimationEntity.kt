@@ -11,5 +11,9 @@ data class CustomAnimationEntity(
     val particleSpeed: Float,
     val particleCount: Int,
     val digitalAnimType: String,
-    val digitalAnimDuration: Long
+    val digitalAnimDuration: Long,
+    val customParticleShape: String = "CIRCLE",
+    val customParticleText: String = "✨",
+    val customParticleDirection: String = "UP",
+    val customParticleColor: Int = -1 // Color.WHITE is represented as -1 (0xFFFFFFFF)
 )

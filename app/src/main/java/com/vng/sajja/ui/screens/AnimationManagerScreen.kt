@@ -47,6 +47,7 @@ data class PredefinedPreset(
 @Composable
 fun AnimationManagerScreen(
     viewModel: SettingsViewModel,
+    navController: androidx.navigation.NavController,
     modifier: Modifier = Modifier
 ) {
     val settings by viewModel.settings.collectAsState()
@@ -146,17 +147,32 @@ fun AnimationManagerScreen(
             }
 
             Spacer(modifier = Modifier.height(12.dp))
-            Button(
-                onClick = {
-                    presetName = ""
-                    presetToEdit = null
-                    showSaveDialog = true
-                },
-                modifier = Modifier.fillMaxWidth()
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Icon(Icons.Default.Save, contentDescription = "Save")
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Save Current Configuration")
+                Button(
+                    onClick = {
+                        navController.navigate("animation_builder")
+                    },
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = "Create")
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text("Build New", fontSize = 13.sp)
+                }
+                
+                OutlinedButton(
+                    onClick = {
+                        // Navigate to builder, and we can pass a special flag or just use current settings as builder defaults
+                        navController.navigate("animation_builder?presetId=-2")
+                    },
+                    modifier = Modifier.weight(1.2f)
+                ) {
+                    Icon(Icons.Default.Save, contentDescription = "Save Current")
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text("Save Active", fontSize = 13.sp)
+                }
             }
         }
 
@@ -214,7 +230,7 @@ fun AnimationManagerScreen(
 
         if (savedPresets.isEmpty()) {
             Text(
-                "No custom animations saved yet. Customize the wallpaper and tap 'Save Current Configuration' above to create one!",
+                "No custom animations saved yet. Customize the wallpaper and tap 'Build New' above to create one!",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -240,7 +256,11 @@ fun AnimationManagerScreen(
                                                 particleSpeed = preset.particleSpeed,
                                                 particleCount = preset.particleCount,
                                                 digitalAnimType = DigitalAnimType.valueOf(preset.digitalAnimType),
-                                                digitalAnimDuration = preset.digitalAnimDuration
+                                                digitalAnimDuration = preset.digitalAnimDuration,
+                                                customParticleShape = preset.customParticleShape,
+                                                customParticleText = preset.customParticleText,
+                                                customParticleDirection = preset.customParticleDirection,
+                                                customParticleColor = preset.customParticleColor
                                             )
                                         )
                                     }
@@ -249,12 +269,10 @@ fun AnimationManagerScreen(
                                 }
                                 IconButton(
                                     onClick = {
-                                        presetToEdit = preset
-                                        presetName = preset.name
-                                        showSaveDialog = true
+                                        navController.navigate("animation_builder?presetId=${preset.id}")
                                     }
                                 ) {
-                                    Icon(Icons.Default.Edit, contentDescription = "Edit Name", tint = MaterialTheme.colorScheme.secondary)
+                                    Icon(Icons.Default.Edit, contentDescription = "Edit Configuration", tint = MaterialTheme.colorScheme.secondary)
                                 }
                                 IconButton(
                                     onClick = {
@@ -277,58 +295,5 @@ fun AnimationManagerScreen(
                 }
             }
         }
-    }
-
-    if (showSaveDialog) {
-        AlertDialog(
-            onDismissRequest = { showSaveDialog = false },
-            title = { Text(if (presetToEdit == null) "Save Custom Animation" else "Rename Preset") },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("Enter a unique name to store this animation profile:")
-                    TextField(
-                        value = presetName,
-                        onValueChange = { presetName = it },
-                        placeholder = { Text("e.g. Neon Firefly Matrix") },
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        if (presetName.isNotBlank()) {
-                            val preset = presetToEdit
-                            if (preset != null) {
-                                // Rename/Update operation
-                                customAnimationDao.updateAnimation(preset.copy(name = presetName))
-                            } else {
-                                // Create operation
-                                customAnimationDao.insertAnimation(
-                                    CustomAnimationEntity(
-                                        name = presetName,
-                                        particleType = settings.particleType.name,
-                                        particleSpeed = settings.particleSpeed,
-                                        particleCount = settings.particleCount,
-                                        digitalAnimType = settings.digitalAnimType.name,
-                                        digitalAnimDuration = settings.digitalAnimDuration
-                                    )
-                                )
-                            }
-                            refreshPresets()
-                            showSaveDialog = false
-                        }
-                    }
-                ) {
-                    Text("Save")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showSaveDialog = false }) {
-                    Text("Cancel")
-                }
-            }
-        )
     }
 }
