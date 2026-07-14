@@ -22,6 +22,10 @@ import com.vng.sajja.ui.components.ColorOptionCard
 import com.vng.sajja.ui.components.GlassmorphicCard
 import com.vng.sajja.ui.utils.toComposeColor
 import com.vng.sajja.ui.viewmodel.SettingsViewModel
+import com.vng.sajja.ui.theme.getContrastingTextColor
+import java.io.File
+import java.io.FileOutputStream
+import java.util.UUID
 
 @Composable
 fun BackgroundSettingsScreen(
@@ -31,11 +35,15 @@ fun BackgroundSettingsScreen(
     val settings by viewModel.settings.collectAsState()
     var showColorPicker by remember { mutableStateOf<String?>(null) }
 
+    val context = androidx.compose.ui.platform.LocalContext.current
     val imageLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri ->
         uri?.let {
-            viewModel.updateSettings(settings.copy(backgroundImageUri = it.toString()))
+            val internalUri = copyUriToInternalStorage(context, it, "background")
+            if (internalUri != null) {
+                viewModel.updateSettings(settings.copy(backgroundImageUri = internalUri))
+            }
         }
     }
 
@@ -50,16 +58,30 @@ fun BackgroundSettingsScreen(
                 Text("Background Type", style = MaterialTheme.typography.titleMedium)
                 Spacer(modifier = Modifier.height(12.dp))
 
+// Note: BackgroundType.entries loop inside BackgroundSettingsScreen
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     BackgroundType.entries.forEach { type ->
+                        val isSelected = settings.backgroundType == type
+                        val contrastColor = getContrastingTextColor(MaterialTheme.colorScheme.primary)
                         FilterChip(
-                            selected = settings.backgroundType == type,
+                            selected = isSelected,
                             onClick = { viewModel.updateSettings(settings.copy(backgroundType = type)) },
-                            label = { Text(type.name) },
-                            modifier = Modifier.weight(1f)
+                            label = {
+                                Text(
+                                    text = type.name,
+                                    color = if (isSelected) contrastColor else MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            },
+                            modifier = Modifier.weight(1f),
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = MaterialTheme.colorScheme.primary,
+                                selectedLabelColor = contrastColor,
+                                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+                                labelColor = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                         )
                     }
                 }
@@ -114,13 +136,6 @@ fun BackgroundSettingsScreen(
                             )
                         }
                     }
-                    BackgroundType.COLLAGE -> {
-                        Text(
-                            "Use the Collage Designer screen to manage your collage images.",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
                 }
             }
         }
@@ -142,5 +157,25 @@ fun BackgroundSettingsScreen(
             }
             showColorPicker = null
         }
+    }
+}
+
+private fun copyUriToInternalStorage(context: android.content.Context, uri: android.net.Uri, prefix: String = "background"): String? {
+    return try {
+        val inputStream = context.contentResolver.openInputStream(uri) ?: return null
+        val folder = File(context.filesDir, prefix)
+        if (!folder.exists()) {
+            folder.mkdirs()
+        }
+        val fileName = "${prefix}_${System.currentTimeMillis()}_${UUID.randomUUID().toString().take(6)}.png"
+        val file = File(folder, fileName)
+        val outputStream = FileOutputStream(file)
+        inputStream.copyTo(outputStream)
+        inputStream.close()
+        outputStream.close()
+        android.net.Uri.fromFile(file).toString()
+    } catch (e: Exception) {
+        e.printStackTrace()
+        null
     }
 }

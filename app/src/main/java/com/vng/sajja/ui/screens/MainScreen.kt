@@ -67,18 +67,18 @@ fun MainScreen(
         "dashboard" -> "Sajja Clock Customizer"
         "background_settings" -> "Background Settings"
         "clock_settings" -> "Clock Face Settings"
-        "collage_settings" -> "Collage Designer"
         "theme_settings" -> "Color & Presets"
         "tools_settings" -> "Backup & Tools"
         "app_settings" -> "App Preferences"
+        "animation_manager" -> "Animation Manager"
         else -> "Sajja Customizer"
     }
 
     val menuItems = listOf(
-        FabMenuItem(Icons.Default.Wallpaper, "Background", "background_settings"),
-        FabMenuItem(Icons.Default.Schedule, "Clock Face", "clock_settings"),
-        FabMenuItem(Icons.Default.PhotoLibrary, "Collage", "collage_settings"),
-        FabMenuItem(Icons.Default.Palette, "Themes", "theme_settings")
+        FabMenuItem(Icons.Default.Palette, "Themes", "theme_settings"),
+        FabMenuItem(Icons.Default.AutoAwesome, "Animations", "animation_manager"),
+        FabMenuItem(Icons.Default.Handyman, "Tools", "tools_settings"),
+        FabMenuItem(Icons.Default.Settings, "Settings", "app_settings")
     )
 
     Scaffold(
@@ -171,9 +171,7 @@ fun MainScreen(
                 composable("clock_settings") {
                     ClockSettingsScreen(viewModel = viewModel)
                 }
-                composable("collage_settings") {
-                    CollageSettingsScreen(viewModel = viewModel)
-                }
+
                 composable("theme_settings") {
                     ThemeSettingsScreen(viewModel = viewModel)
                 }
@@ -182,6 +180,9 @@ fun MainScreen(
                 }
                 composable("app_settings") {
                     AppSettingsScreen(viewModel = viewModel)
+                }
+                composable("animation_manager") {
+                    AnimationManagerScreen(viewModel = viewModel)
                 }
             }
 
@@ -284,9 +285,9 @@ fun DashboardScreen(
 
         // Custom Categories List / Grid (styled beautiful)
         val categories = listOf(
-            CategoryItem("Background Style", "Set colors, gradients, or custom collage backgrounds.", Icons.Default.Wallpaper, "background_settings"),
+            CategoryItem("Background Style", "Set colors, gradients, or custom image backgrounds.", Icons.Default.Wallpaper, "background_settings"),
             CategoryItem("Clock Face & Hands", "Configure clock dial numerals, hands, ticks, and day/date display.", Icons.Default.Schedule, "clock_settings"),
-            CategoryItem("Collage Designer", "Manage collage layouts and arrange photos.", Icons.Default.PhotoLibrary, "collage_settings"),
+            CategoryItem("Animation Manager", "Create, customize, and save live animations and particle effects.", Icons.Default.AutoAwesome, "animation_manager"),
             CategoryItem("Theme Presets", "Load instant styled layouts or color themes.", Icons.Default.Palette, "theme_settings"),
             CategoryItem("Backup & Tools", "Import or export your Sajja settings configurations.", Icons.Default.Settings, "tools_settings"),
             CategoryItem("App Preferences", "Customize dark mode and application accent colors.", Icons.Default.Tune, "app_settings")

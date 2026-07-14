@@ -58,7 +58,10 @@ class MinimalClockWallpaperService : WallpaperService() {
             val canvas = surfaceHolder.lockCanvas() ?: return
             try {
                 val settings = repository.load().copy(clockType = ClockType.MINIMALIST)
-                val frameDelay = if (settings.smoothSecondHand && settings.clockType != ClockType.DIGITAL) 16L else 1000L
+                val isAnimated = settings.smoothSecondHand ||
+                        settings.particleType != com.vng.sajja.domain.model.ParticleType.NONE ||
+                        (settings.clockType == ClockType.DIGITAL && settings.digitalAnimType != com.vng.sajja.domain.model.DigitalAnimType.NONE)
+                val frameDelay = if (isAnimated) 16L else 1000L
 
                 ClockRenderer.draw(canvas, settings, Calendar.getInstance(), ::loadBitmap)
 

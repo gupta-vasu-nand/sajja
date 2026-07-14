@@ -10,6 +10,7 @@ import com.vng.sajja.domain.model.AppSettings
 import com.vng.sajja.domain.model.AppThemeMode
 
 import androidx.compose.ui.graphics.toArgb
+import androidx.core.graphics.toColorInt
 
 fun getContrastingTextColor(backgroundColor: Color): Color {
     val red = backgroundColor.red
@@ -30,7 +31,7 @@ fun SajjaTheme(
         AppThemeMode.SYSTEM -> isSystemInDarkTheme()
     }
 
-    val primaryColor = Color(android.graphics.Color.parseColor(appSettings.activeColorHex))
+    val primaryColor = Color(appSettings.activeColorHex.toColorInt())
 
     // Derive secondary and tertiary colors dynamically using HSV color shifts
     val temp = FloatArray(3)

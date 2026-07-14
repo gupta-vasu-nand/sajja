@@ -1,13 +1,12 @@
 package com.vng.sajja.ui.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ColorLens
 import androidx.compose.material.icons.filled.Palette
@@ -16,20 +15,15 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import kotlin.math.roundToInt
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AdvancedColorPickerDialog(
     initial: Color,
@@ -41,146 +35,130 @@ fun AdvancedColorPickerDialog(
     var b by remember { mutableStateOf((initial.blue * 255).roundToInt()) }
 
     val selectedColor = Color(r, g, b)
-    val keyboardController = LocalSoftwareKeyboardController.current
-    val focusRequesterR = remember { FocusRequester() }
-    val focusRequesterG = remember { FocusRequester() }
-    val focusRequesterB = remember { FocusRequester() }
 
-    AlertDialog(
+    Dialog(
         onDismissRequest = onDismiss,
-        properties = DialogProperties(usePlatformDefaultWidth = false),
-        modifier = Modifier
-            .fillMaxWidth(0.9f)
-            .padding(horizontal = 16.dp)
+        properties = DialogProperties(usePlatformDefaultWidth = false)
     ) {
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
-            shape = RoundedCornerShape(24.dp)
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth(0.9f)
+                .wrapContentHeight()
+                .padding(16.dp),
+            shape = RoundedCornerShape(28.dp),
+            color = MaterialTheme.colorScheme.surface,
+            tonalElevation = 6.dp,
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
         ) {
             Column(
-                modifier = Modifier.padding(24.dp),
-                verticalArrangement = Arrangement.spacedBy(20.dp)
+                modifier = Modifier.padding(20.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
+                // Header
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Default.ColorLens,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(28.dp)
+                        modifier = Modifier.size(24.dp)
                     )
                     Text(
-                        text = "Color Picker",
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold
+                        text = "Select Color",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
 
-                // Color preview with hex code
+                // Selected Color Box
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(100.dp)
+                        .height(64.dp)
                         .clip(RoundedCornerShape(16.dp))
                         .background(selectedColor)
                         .border(
-                            2.dp,
-                            MaterialTheme.colorScheme.outline,
+                            1.dp,
+                            MaterialTheme.colorScheme.outlineVariant,
                             RoundedCornerShape(16.dp)
                         )
                 ) {
-                    Column(
+                    Row(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(16.dp),
-                        verticalArrangement = Arrangement.SpaceBetween
+                            .padding(horizontal = 16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
                     ) {
+                        val textColor = if (selectedColor.luminance() > 0.5) Color.Black else Color.White
                         Text(
-                            text = "Selected Color",
-                            color = if (selectedColor.luminance() > 0.5) Color.Black else Color.White,
-                            fontWeight = FontWeight.Medium,
-                            fontSize = 18.sp
+                            text = "Hex Code",
+                            color = textColor.copy(alpha = 0.8f),
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 14.sp
                         )
-                        Column {
-                            Text(
-                                text = "HEX: #${r.toString(16).padStart(2, '0').uppercase()}${g.toString(16).padStart(2, '0').uppercase()}${b.toString(16).padStart(2, '0').uppercase()}",
-                                color = if (selectedColor.luminance() > 0.5) Color.Black.copy(alpha = 0.8f) else Color.White.copy(alpha = 0.8f),
-                                fontSize = 14.sp
-                            )
-                            Text(
-                                text = "RGB: $r, $g, $b",
-                                color = if (selectedColor.luminance() > 0.5) Color.Black.copy(alpha = 0.8f) else Color.White.copy(alpha = 0.8f),
-                                fontSize = 14.sp
-                            )
-                        }
+                        Text(
+                            text = "#${r.toString(16).padStart(2, '0').uppercase()}${g.toString(16).padStart(2, '0').uppercase()}${b.toString(16).padStart(2, '0').uppercase()}",
+                            color = textColor,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp
+                        )
                     }
                 }
 
-                // Color sliders with numeric input
-                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                    ColorSliderWithInput(
-                        label = "Red",
+                // RGB sliders stacked horizontally
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    ColorSliderRow(
+                        label = "R",
                         value = r,
                         onValueChange = { r = it },
-                        color = Color.Red,
-                        focusRequester = focusRequesterR,
-                        nextFocusRequester = focusRequesterG
+                        color = Color(0xFFE57373)
                     )
-
-                    ColorSliderWithInput(
-                        label = "Green",
+                    ColorSliderRow(
+                        label = "G",
                         value = g,
                         onValueChange = { g = it },
-                        color = Color.Green,
-                        focusRequester = focusRequesterG,
-                        nextFocusRequester = focusRequesterB
+                        color = Color(0xFF81C784)
                     )
-
-                    ColorSliderWithInput(
-                        label = "Blue",
+                    ColorSliderRow(
+                        label = "B",
                         value = b,
                         onValueChange = { b = it },
-                        color = Color.Blue,
-                        focusRequester = focusRequesterB,
-                        nextFocusRequester = null
+                        color = Color(0xFF64B5F6)
                     )
                 }
 
-                // Color palette for quick picks
+                // Divider
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+
+                // Color Palette
                 QuickColorPalette { color ->
                     r = (color.red * 255).roundToInt()
                     g = (color.green * 255).roundToInt()
                     b = (color.blue * 255).roundToInt()
-                    keyboardController?.hide()
                 }
 
-                // Buttons
+                // Dialog Buttons
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    TextButton(
-                        onClick = {
-                            keyboardController?.hide()
-                            onDismiss()
-                        },
-                        modifier = Modifier.padding(end = 8.dp)
-                    ) {
+                    TextButton(onClick = onDismiss) {
                         Text("Cancel")
                     }
+                    Spacer(modifier = Modifier.width(8.dp))
                     Button(
                         onClick = {
-                            keyboardController?.hide()
                             onPick(selectedColor)
                             onDismiss()
                         },
                         shape = RoundedCornerShape(12.dp)
                     ) {
-                        Text("Apply Color")
+                        Text("Apply")
                     }
                 }
             }
@@ -188,74 +166,58 @@ fun AdvancedColorPickerDialog(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ColorSliderWithInput(
+private fun ColorSliderRow(
     label: String,
     value: Int,
     onValueChange: (Int) -> Unit,
-    color: Color,
-    focusRequester: FocusRequester,
-    nextFocusRequester: FocusRequester?
+    color: Color
 ) {
-    val keyboardController = LocalSoftwareKeyboardController.current
-
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        // Label with color dot
         Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            modifier = Modifier.width(36.dp)
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(24.dp)
-                        .clip(CircleShape)
-                        .background(color)
-                        .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape)
-                )
-                Text(
-                    text = label,
-                    fontWeight = FontWeight.Medium,
-                    fontSize = 16.sp
-                )
-            }
-
-            OutlinedTextField(
-                value = value.toString(),
-                onValueChange = {
-                    val newValue = it.toIntOrNull() ?: 0
-                    if (newValue in 0..255) onValueChange(newValue)
-                },
+            Box(
                 modifier = Modifier
-                    .width(80.dp)
-                    .focusRequester(focusRequester),
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Number,
-                    imeAction = if (nextFocusRequester != null) ImeAction.Next else ImeAction.Done
-                ),
-                keyboardActions = KeyboardActions(
-                    onNext = { nextFocusRequester?.requestFocus() },
-                    onDone = { keyboardController?.hide() }
-                ),
-                shape = RoundedCornerShape(8.dp)
+                    .size(10.dp)
+                    .clip(CircleShape)
+                    .background(color)
+            )
+            Text(
+                text = label,
+                fontWeight = FontWeight.Bold,
+                fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.onSurface
             )
         }
 
+        // Slider takes up the rest
         Slider(
             value = value / 255f,
             onValueChange = { onValueChange((it * 255).roundToInt()) },
             valueRange = 0f..1f,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.weight(1f),
             colors = SliderDefaults.colors(
                 thumbColor = color,
                 activeTrackColor = color,
-                inactiveTrackColor = color.copy(alpha = 0.3f)
+                inactiveTrackColor = color.copy(alpha = 0.25f)
             )
+        )
+
+        // Value text chip
+        Text(
+            text = value.toString().padStart(3, '0'),
+            fontSize = 13.sp,
+            fontWeight = FontWeight.Medium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.width(28.dp)
         )
     }
 }
@@ -266,83 +228,58 @@ private fun QuickColorPalette(onColorSelected: (Color) -> Unit) {
         Pair(Color.Red, "Red"),
         Pair(Color.Green, "Green"),
         Pair(Color.Blue, "Blue"),
-        Pair(Color.White, "White"),
-        Pair(Color.Black, "Black"),
         Pair(Color.Yellow, "Yellow"),
         Pair(Color.Magenta, "Magenta"),
         Pair(Color.Cyan, "Cyan"),
-        Pair(MaterialTheme.colorScheme.primary, "Primary"),
-        Pair(MaterialTheme.colorScheme.secondary, "Secondary"),
-        Pair(MaterialTheme.colorScheme.tertiary, "Tertiary"),
+        Pair(Color.White, "White"),
+        Pair(Color.Black, "Black"),
         Pair(Color(0xFF9C27B0), "Purple"),
         Pair(Color(0xFF3F51B5), "Indigo"),
-        Pair(Color(0xFF2196F3), "Blue"),
-        Pair(Color(0xFF00BCD4), "Cyan"),
-        Pair(Color(0xFF4CAF50), "Green"),
         Pair(Color(0xFFFF9800), "Orange"),
-        Pair(Color(0xFF795548), "Brown"),
-        Pair(Color(0xFF607D8B), "Gray")
+        Pair(Color(0xFF795548), "Brown")
     )
 
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             Icon(
                 imageVector = Icons.Default.Palette,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(20.dp)
+                modifier = Modifier.size(18.dp)
             )
             Text(
-                text = "Quick Colors",
+                text = "Preset Colors",
                 fontWeight = FontWeight.Medium,
-                fontSize = 16.sp
+                fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
-        Box(
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(72.dp)
+                .height(40.dp)
         ) {
             androidx.compose.foundation.lazy.LazyRow(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.fillMaxSize()
             ) {
                 items(quickColors.size) { index ->
-                    val (color, label) = quickColors[index]
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(48.dp)
-                                .clip(CircleShape)
-                                .background(color)
-                                .border(
-                                    2.dp,
-                                    MaterialTheme.colorScheme.outline,
-                                    CircleShape
-                                )
-                                .clickable { onColorSelected(color) },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .clip(CircleShape)
-                                    .background(Color.Black.copy(alpha = 0.1f))
-                                    .padding(4.dp)
+                    val (color, _) = quickColors[index]
+                    Box(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .clip(CircleShape)
+                            .background(color)
+                            .border(
+                                1.dp,
+                                MaterialTheme.colorScheme.outlineVariant,
+                                CircleShape
                             )
-                        }
-                        Text(
-                            text = label,
-                            fontSize = 10.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
+                            .clickable { onColorSelected(color) }
+                    )
                 }
             }
         }

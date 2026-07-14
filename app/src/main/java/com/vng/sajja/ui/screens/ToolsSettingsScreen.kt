@@ -60,6 +60,10 @@ fun ToolsSettingsScreen(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
+                    val buttonColors = ButtonDefaults.filledTonalButtonColors(
+                        containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
+                        contentColor = MaterialTheme.colorScheme.primary
+                    )
                     FilledTonalButton(
                         onClick = {
                             val json = viewModel.exportTheme()
@@ -74,14 +78,16 @@ fun ToolsSettingsScreen(
                                 null
                             )
                         },
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
+                        colors = buttonColors
                     ) {
                         Text("Export to Share")
                     }
 
                     FilledTonalButton(
                         onClick = { filePicker.launch("application/json") },
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
+                        colors = buttonColors
                     ) {
                         Text("Import from File")
                     }
@@ -117,48 +123,7 @@ fun ToolsSettingsScreen(
                 }
             }
 
-            // Collage Tools Card
-            GlassmorphicCard(modifier = Modifier.fillMaxWidth()) {
-                Text(
-                    "Collage Operations",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
-                Spacer(modifier = Modifier.height(12.dp))
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    FilledTonalButton(
-                        onClick = {
-                            val images = settings.collageImages.mapIndexed { index, image ->
-                                val row = index / 3
-                                val col = index % 3
-                                image.copy(
-                                    x = 0.05f + col * 0.3f,
-                                    y = 0.05f + row * 0.3f,
-                                    width = 0.25f,
-                                    height = 0.25f
-                                )
-                            }
-                            viewModel.updateSettings(settings.copy(collageImages = images))
-                        },
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Text("Auto-Align Grid")
-                    }
-
-                    FilledTonalButton(
-                        onClick = {
-                            viewModel.updateSettings(settings.copy(collageImages = emptyList()))
-                        },
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Text("Clear Canvas")
-                    }
-                }
-            }
 
             // Quick Preset Backup Card
             GlassmorphicCard(modifier = Modifier.fillMaxWidth()) {
@@ -173,16 +138,22 @@ fun ToolsSettingsScreen(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
+                    val buttonColors = ButtonDefaults.filledTonalButtonColors(
+                        containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
+                        contentColor = MaterialTheme.colorScheme.primary
+                    )
                     FilledTonalButton(
                         onClick = { viewModel.savePreset(context) },
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
+                        colors = buttonColors
                     ) {
                         Text("Backup Preset")
                     }
 
                     FilledTonalButton(
                         onClick = { viewModel.loadLastPreset(context) },
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
+                        colors = buttonColors
                     ) {
                         Text("Restore Backup")
                     }

@@ -2,6 +2,7 @@ package com.vng.sajja.ui.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -78,54 +79,12 @@ fun ThemeSettingsScreen(
                 }
             }
 
-            GlassmorphicCard(modifier = Modifier.fillMaxWidth()) {
-                Text("Collage Templates", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    "Start with a pre-designed collage template",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Spacer(modifier = Modifier.height(12.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    PresetButton(
-                        label = "Memories",
-                        onClick = { viewModel.updateSettings(ThemePresets.MemoriesCollage) },
-                        color = Color(0xFF1A1A2E),
-                        textColor = Color.White,
-                        modifier = Modifier.weight(1f)
-                    )
-                    PresetButton(
-                        label = "Travel",
-                        onClick = { viewModel.updateSettings(ThemePresets.TravelCollage) },
-                        color = Color(0xFF0F3460),
-                        textColor = Color.White,
-                        modifier = Modifier.weight(1f)
-                    )
-                }
-                Spacer(modifier = Modifier.height(8.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    PresetButton(
-                        label = "Minimal",
-                        onClick = { viewModel.updateSettings(ThemePresets.MinimalCollage) },
-                        color = Color.Black,
-                        textColor = Color.White,
-                        modifier = Modifier.weight(1f)
-                    )
-                    FilledTonalButton(
-                        onClick = { viewModel.updateSettings(WallpaperSettings()) },
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Text("Reset All")
-                    }
-                }
+            Button(
+                onClick = { viewModel.updateSettings(WallpaperSettings()) },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text("Reset All Settings", fontWeight = FontWeight.Bold)
             }
         }
     }
