@@ -12,7 +12,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.vng.sajja.ui.components.SajjaSplashScreen
-import com.vng.sajja.ui.screens.MainScreen
+import com.vng.sajja.ui.screens.main.MainScreen
 import com.vng.sajja.ui.theme.SajjaTheme
 import com.vng.sajja.ui.viewmodel.SettingsViewModel
 import com.vng.sajja.ui.viewmodel.SettingsViewModelFactory

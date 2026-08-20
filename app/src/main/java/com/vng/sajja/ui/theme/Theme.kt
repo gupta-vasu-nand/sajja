@@ -6,18 +6,64 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
-import com.vng.sajja.domain.model.AppSettings
-import com.vng.sajja.domain.model.AppThemeMode
-
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.graphics.toColorInt
+import com.vng.sajja.domain.model.AppSettings
+import com.vng.sajja.domain.model.AppThemeMode
+import kotlin.math.pow
 
-fun getContrastingTextColor(backgroundColor: Color): Color {
-    val red = backgroundColor.red
-    val green = backgroundColor.green
-    val blue = backgroundColor.blue
-    val luminance = 0.299f * red + 0.587f * green + 0.114f * blue
-    return if (luminance > 0.5f) Color.Black else Color.White
+/**
+ * Calculates a contrasting text color (either Dark or White) based on the background color,
+ * taking into account WCAG relative luminance, alpha transparency, and system theme mode.
+ */
+fun getContrastingTextColor(
+    backgroundColor: Color,
+    isDarkTheme: Boolean = false
+): Color {
+    val alpha = backgroundColor.alpha
+
+    // If background alpha is very small (translucent), the dominant visible background is the underlying system theme
+    if (alpha < 0.35f) {
+        return if (isDarkTheme) Color.White else Color(0xFF0D0D0D)
+    }
+
+    // Blend transparent background over system background for accurate luminance calculation
+    val baseThemeBackground = if (isDarkTheme) Color(0xFF121212) else Color(0xFFFFFFFF)
+    val effectiveColor = blendColor(backgroundColor, baseThemeBackground)
+
+    // Calculate WCAG relative luminance
+    val relativeLuminance = calculateRelativeLuminance(effectiveColor)
+
+    // WCAG standard threshold: relative luminance > 0.45 requires dark text, otherwise white text.
+    // For vibrant coral (#FC5E6A), relativeLuminance is ~0.30, evaluating cleanly to Color.White.
+    return if (relativeLuminance > 0.45f) Color(0xFF0D0D0D) else Color.White
+}
+
+private fun blendColor(foreground: Color, background: Color): Color {
+    val alpha = foreground.alpha.coerceIn(0f, 1f)
+    val invAlpha = 1f - alpha
+
+    val red = foreground.red * alpha + background.red * invAlpha
+    val green = foreground.green * alpha + background.green * invAlpha
+    val blue = foreground.blue * alpha + background.blue * invAlpha
+
+    return Color(red = red, green = green, blue = blue, alpha = 1f)
+}
+
+private fun calculateRelativeLuminance(color: Color): Float {
+    fun convert(channel: Float): Float {
+        return if (channel <= 0.04045f) {
+            channel / 12.92f
+        } else {
+            ((channel + 0.055f) / 1.055f).pow(2.4f)
+        }
+    }
+
+    val r = convert(color.red)
+    val g = convert(color.green)
+    val b = convert(color.blue)
+
+    return 0.2126f * r + 0.7152f * g + 0.0722f * b
 }
 
 @Composable
@@ -55,9 +101,9 @@ fun SajjaTheme(
             primary = primaryColor,
             secondary = secondaryColor,
             tertiary = tertiaryColor,
-            onPrimary = getContrastingTextColor(primaryColor),
-            onSecondary = getContrastingTextColor(secondaryColor),
-            onTertiary = getContrastingTextColor(tertiaryColor),
+            onPrimary = getContrastingTextColor(primaryColor, isDarkTheme = true),
+            onSecondary = getContrastingTextColor(secondaryColor, isDarkTheme = true),
+            onTertiary = getContrastingTextColor(tertiaryColor, isDarkTheme = true),
             background = Color.Black,
             surface = Color.Black,
             onBackground = Color.White,
@@ -73,9 +119,9 @@ fun SajjaTheme(
             primary = primaryColor,
             secondary = secondaryColor,
             tertiary = tertiaryColor,
-            onPrimary = getContrastingTextColor(primaryColor),
-            onSecondary = getContrastingTextColor(secondaryColor),
-            onTertiary = getContrastingTextColor(tertiaryColor),
+            onPrimary = getContrastingTextColor(primaryColor, isDarkTheme = false),
+            onSecondary = getContrastingTextColor(secondaryColor, isDarkTheme = false),
+            onTertiary = getContrastingTextColor(tertiaryColor, isDarkTheme = false),
             background = Color.White,
             surface = Color.White,
             onBackground = Color.Black,

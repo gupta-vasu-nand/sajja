@@ -1,0 +1,435 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="28dp"
+    android:height="28dp"
+    android:viewportWidth="96"
+    android:viewportHeight="96">
+
+    <!-- ========================================================= -->
+    <!-- SOFT BACKGROUND GLOW                                      -->
+    <!-- ========================================================= -->
+    <path android:pathData="M48,8 A40,40 0,1 1,48,88 A40,40 0,1 1,48,8">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="radial"
+                android:centerX="48"
+                android:centerY="48"
+                android:gradientRadius="40">
+                <item
+                    android:offset="0"
+                    android:color="#4000E5FF" />
+                <item
+                    android:offset="0.65"
+                    android:color="#180066FF" />
+                <item
+                    android:offset="1"
+                    android:color="#00000000" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+
+    <!-- ========================================================= -->
+    <!-- GLASS BASE / SHADOW                                       -->
+    <!-- ========================================================= -->
+    <path
+        android:pathData="M18,78
+                          L78,78
+                          C84,78 88,81 88,84
+                          C88,87 84,89 78,89
+                          L18,89
+                          C12,89 8,87 8,84
+                          C8,81 12,78 18,78 Z"
+        android:fillColor="#3000BFFF" />
+
+    <path
+        android:pathData="M18,76
+                          L78,76
+                          C84,76 88,79 88,83
+                          C88,87 84,89 78,89
+                          L18,89
+                          C12,89 8,87 8,83
+                          C8,79 12,76 18,76 Z"
+        android:strokeWidth="1.2"
+        android:strokeColor="#80D9F8FF">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="8"
+                android:startY="76"
+                android:endX="88"
+                android:endY="89">
+                <item
+                    android:offset="0"
+                    android:color="#6015D8FF" />
+                <item
+                    android:offset="0.5"
+                    android:color="#50206CFF" />
+                <item
+                    android:offset="1"
+                    android:color="#7020DFFF" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+
+    <!-- ========================================================= -->
+    <!-- OUTER CLOCK BEZEL                                        -->
+    <!-- ========================================================= -->
+    <path
+        android:pathData="M48,9
+                          A39,39 0,1 1,48,87
+                          A39,39 0,1 1,48,9"
+        android:strokeWidth="3"
+        android:strokeColor="#D0EFFFFF">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="16"
+                android:startY="14"
+                android:endX="78"
+                android:endY="82">
+                <item
+                    android:offset="0"
+                    android:color="#FF00F2FE" />
+                <item
+                    android:offset="0.42"
+                    android:color="#FF0077FF" />
+                <item
+                    android:offset="1"
+                    android:color="#FF001A4D" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+
+    <!-- ========================================================= -->
+    <!-- OUTER GLASS HIGHLIGHT                                    -->
+    <!-- ========================================================= -->
+    <path
+        android:pathData="M48,12
+                          A36,36 0,1 1,48,84
+                          A36,36 0,1 1,48,12"
+        android:strokeWidth="1.4"
+        android:strokeColor="#70FFFFFF"
+        android:fillColor="#00000000" />
+
+
+    <!-- ========================================================= -->
+    <!-- INNER DIAL                                               -->
+    <!-- ========================================================= -->
+    <path
+        android:pathData="M48,16
+                          A32,32 0,1 1,48,80
+                          A32,32 0,1 1,48,16">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="18"
+                android:startY="16"
+                android:endX="78"
+                android:endY="80">
+                <item
+                    android:offset="0"
+                    android:color="#DDEFFFFF" />
+                <item
+                    android:offset="0.30"
+                    android:color="#8012BFFF" />
+                <item
+                    android:offset="0.70"
+                    android:color="#500064C9" />
+                <item
+                    android:offset="1"
+                    android:color="#50001545" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+
+    <!-- ========================================================= -->
+    <!-- TOP GLASS REFLECTION                                     -->
+    <!-- ========================================================= -->
+    <path
+        android:pathData="M20,35
+                          C25,23 36,17 48,17
+                          C60,17 71,23 76,35
+                          C63,29 34,29 20,35 Z"
+        android:fillColor="#45FFFFFF" />
+
+
+    <!-- ========================================================= -->
+    <!-- INNER DIAL BORDER                                        -->
+    <!-- ========================================================= -->
+    <path
+        android:pathData="M48,17
+                          A31,31 0,1 1,48,79
+                          A31,31 0,1 1,48,17"
+        android:strokeWidth="0.8"
+        android:strokeColor="#50FFFFFF"
+        android:fillColor="#00000000" />
+
+
+    <!-- ========================================================= -->
+    <!-- MINOR HOUR MARKERS                                      -->
+    <!-- ========================================================= -->
+
+    <!-- 1 -->
+    <path
+        android:pathData="M62,23.5 L59.5,28"
+        android:strokeWidth="1.6"
+        android:strokeColor="#B0FFFFFF"
+        android:strokeLineCap="round" />
+
+    <!-- 2 -->
+    <path
+        android:pathData="M72.5,34 L68,36.5"
+        android:strokeWidth="1.6"
+        android:strokeColor="#B0FFFFFF"
+        android:strokeLineCap="round" />
+
+    <!-- 4 -->
+    <path
+        android:pathData="M72.5,62 L68,59.5"
+        android:strokeWidth="1.6"
+        android:strokeColor="#B0FFFFFF"
+        android:strokeLineCap="round" />
+
+    <!-- 5 -->
+    <path
+        android:pathData="M62,72.5 L59.5,68"
+        android:strokeWidth="1.6"
+        android:strokeColor="#B0FFFFFF"
+        android:strokeLineCap="round" />
+
+    <!-- 7 -->
+    <path
+        android:pathData="M34,72.5 L36.5,68"
+        android:strokeWidth="1.6"
+        android:strokeColor="#B0FFFFFF"
+        android:strokeLineCap="round" />
+
+    <!-- 8 -->
+    <path
+        android:pathData="M23.5,62 L28,59.5"
+        android:strokeWidth="1.6"
+        android:strokeColor="#B0FFFFFF"
+        android:strokeLineCap="round" />
+
+    <!-- 10 -->
+    <path
+        android:pathData="M23.5,34 L28,36.5"
+        android:strokeWidth="1.6"
+        android:strokeColor="#B0FFFFFF"
+        android:strokeLineCap="round" />
+
+    <!-- 11 -->
+    <path
+        android:pathData="M34,23.5 L36.5,28"
+        android:strokeWidth="1.6"
+        android:strokeColor="#B0FFFFFF"
+        android:strokeLineCap="round" />
+
+
+    <!-- ========================================================= -->
+    <!-- GOLDEN ACCENT ARC                                        -->
+    <!-- ========================================================= -->
+    <path
+        android:pathData="M72,48 A24,24 0,0 1,48,72"
+        android:strokeWidth="3.5"
+        android:strokeLineCap="round"
+        android:fillColor="#00000000">
+
+        <aapt:attr name="android:strokeColor">
+            <gradient
+                android:type="linear"
+                android:startX="72"
+                android:startY="48"
+                android:endX="48"
+                android:endY="72">
+                <item
+                    android:offset="0"
+                    android:color="#FFFFF6B0" />
+                <item
+                    android:offset="0.35"
+                    android:color="#FFFFD83D" />
+                <item
+                    android:offset="0.75"
+                    android:color="#FFFFA51B" />
+                <item
+                    android:offset="1"
+                    android:color="#FFFF6A00" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+
+    <!-- ========================================================= -->
+    <!-- MAJOR HOUR MARKERS                                      -->
+    <!-- ========================================================= -->
+
+    <!-- 12 -->
+    <path
+        android:pathData="M48,19 L48,26"
+        android:strokeWidth="3.2"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeLineCap="round" />
+
+    <!-- 3 -->
+    <path
+        android:pathData="M77,48 L70,48"
+        android:strokeWidth="3.2"
+        android:strokeColor="#FFFFE34D"
+        android:strokeLineCap="round" />
+
+    <!-- 6 -->
+    <path
+        android:pathData="M48,77 L48,70"
+        android:strokeWidth="3.2"
+        android:strokeColor="#FFFF8A00"
+        android:strokeLineCap="round" />
+
+    <!-- 9 -->
+    <path
+        android:pathData="M19,48 L26,48"
+        android:strokeWidth="3.2"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeLineCap="round" />
+
+
+    <!-- ========================================================= -->
+    <!-- HOUR HAND - GOLD                                        -->
+    <!-- ========================================================= -->
+    <path
+        android:pathData="M48,48 L32,32"
+        android:strokeWidth="5"
+        android:strokeLineCap="round">
+
+        <aapt:attr name="android:strokeColor">
+            <gradient
+                android:type="linear"
+                android:startX="32"
+                android:startY="32"
+                android:endX="48"
+                android:endY="48">
+                <item
+                    android:offset="0"
+                    android:color="#FFFFF5A0" />
+                <item
+                    android:offset="0.5"
+                    android:color="#FFFFCF32" />
+                <item
+                    android:offset="1"
+                    android:color="#FFFF8500" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Hour hand highlight -->
+    <path
+        android:pathData="M47,47 L34,34"
+        android:strokeWidth="1.4"
+        android:strokeLineCap="round"
+        android:strokeColor="#FFFFFFFF" />
+
+
+    <!-- ========================================================= -->
+    <!-- MINUTE HAND - CYAN                                      -->
+    <!-- ========================================================= -->
+    <path
+        android:pathData="M48,48 L68,28"
+        android:strokeWidth="4"
+        android:strokeLineCap="round">
+
+        <aapt:attr name="android:strokeColor">
+            <gradient
+                android:type="linear"
+                android:startX="48"
+                android:startY="48"
+                android:endX="68"
+                android:endY="28">
+                <item
+                    android:offset="0"
+                    android:color="#FF00F2FE" />
+                <item
+                    android:offset="0.55"
+                    android:color="#FF008CFF" />
+                <item
+                    android:offset="1"
+                    android:color="#FF0045CC" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Minute hand highlight -->
+    <path
+        android:pathData="M49,47 L66,30"
+        android:strokeWidth="1.3"
+        android:strokeLineCap="round"
+        android:strokeColor="#FFFFFFFF" />
+
+
+    <!-- ========================================================= -->
+    <!-- SECOND HAND - EMERALD                                   -->
+    <!-- ========================================================= -->
+    <path
+        android:pathData="M48,48 L48,69"
+        android:strokeWidth="2"
+        android:strokeLineCap="round"
+        android:strokeColor="#FF00E676" />
+
+    <!-- Counterweight -->
+    <path
+        android:pathData="M48,48 L48,41"
+        android:strokeWidth="2.5"
+        android:strokeLineCap="round"
+        android:strokeColor="#FF00E676" />
+
+
+    <!-- ========================================================= -->
+    <!-- CENTER HUB                                               -->
+    <!-- ========================================================= -->
+    <path
+        android:pathData="M48,41
+                          A7,7 0,1 1,48,55
+                          A7,7 0,1 1,48,41"
+        android:strokeWidth="1"
+        android:strokeColor="#FFFFFFFF">
+
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="41"
+                android:startY="41"
+                android:endX="55"
+                android:endY="55">
+                <item
+                    android:offset="0"
+                    android:color="#FF00F2FE" />
+                <item
+                    android:offset="0.55"
+                    android:color="#FF008CFF" />
+                <item
+                    android:offset="1"
+                    android:color="#FF0048C8" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+
+    <!-- ========================================================= -->
+    <!-- CENTER GEM                                               -->
+    <!-- ========================================================= -->
+    <path
+        android:pathData="M48,44.5
+                          A3.5,3.5 0,1 1,48,51.5
+                          A3.5,3.5 0,1 1,48,44.5"
+        android:fillColor="#FFFFFFFF" />
+
+    <!-- Tiny center highlight -->
+    <path
+        android:pathData="M46.8,46
+                          A1.4,1.4 0,1 1,49.6,46
+                          A1.4,1.4 0,1 1,46.8,46"
+        android:fillColor="#FFFFFFFF" />
+
+</vector>

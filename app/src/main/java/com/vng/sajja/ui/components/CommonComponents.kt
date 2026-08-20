@@ -154,6 +154,7 @@ fun PresetButton(
 @Composable
 fun GlassmorphicCard(
     modifier: Modifier = Modifier,
+    shape: androidx.compose.ui.graphics.Shape = RoundedCornerShape(16.dp),
     content: @Composable ColumnScope.() -> Unit
 ) {
     val isDark = MaterialTheme.colorScheme.background == Color.Black
@@ -172,9 +173,9 @@ fun GlassmorphicCard(
 
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(16.dp))
+            .clip(shape)
             .background(backgroundColor)
-            .border(1.dp, borderColor, RoundedCornerShape(16.dp))
+            .border(1.dp, borderColor, shape)
             .padding(16.dp)
     ) {
         Column {

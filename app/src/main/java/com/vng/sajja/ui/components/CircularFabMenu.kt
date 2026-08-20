@@ -147,8 +147,7 @@ fun FabMenuItemView(
 
         Text(
             text = item.label,
-            modifier = Modifier
-                .padding(top = 4.dp),
+            modifier = Modifier.padding(top = 4.dp),
             style = MaterialTheme.typography.labelSmall,
             fontWeight = FontWeight.Bold,
             color = contentColor,
@@ -161,6 +160,7 @@ fun FabMenuItemView(
 @Composable
 fun CircularFabMenu(
     expanded: Boolean,
+    onToggle: () -> Unit,
     items: List<FabMenuItem>,
     onItemClick: (FabMenuItem) -> Unit,
     modifier: Modifier = Modifier,
@@ -248,12 +248,17 @@ fun CircularFabMenu(
             ) {
                 Box(
                     modifier = Modifier
-                        .size(85.dp)
+                        .size(80.dp)
                         .offset(x = -offsetX, y = -offsetY)
                 ) {
                     content(item)
                 }
             }
         }
+
+        ExpandableFab(
+            expanded = expanded,
+            onClick = onToggle
+        )
     }
 }

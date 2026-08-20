@@ -52,10 +52,12 @@ object ClockRenderer {
         canvas: Canvas,
         s: WallpaperSettings,
         time: Calendar,
-        loadBitmap: (String) -> Bitmap?
+        loadBitmap: (String) -> Bitmap?,
+        isCharging: Boolean = false
     ) {
         drawBackground(canvas, s, loadBitmap)
         ParticleEffects.draw(canvas, s)
+        ChargingEffects.draw(canvas, s, isCharging)
 
         val cx = canvas.width / 2f
         val cy = canvas.height / 2f
@@ -254,8 +256,10 @@ object ClockRenderer {
             else -> Typeface.create(Typeface.MONOSPACE, Typeface.BOLD)
         }
 
+        val scaleFactor = (canvas.width / 1080f).coerceAtLeast(0.2f)
         digitalPaint.color = s.numeralColor
-        digitalPaint.textSize = s.numeralSize * 3.5f * s.clockSize
+        val baseTextSize = s.numeralSize * 3.5f * s.clockSize * scaleFactor
+        digitalPaint.textSize = baseTextSize
 
         val formatPattern = if (s.use24HourFormat) {
             if (s.showSecondHand) "HH:mm:ss" else "HH:mm"
@@ -268,6 +272,13 @@ object ClockRenderer {
         val timeText = timeSdf.format(time.time)
         val amPmText = amPmSdf.format(time.time)
 
+        // Ensure text auto-fits within 80% of canvas width to prevent clipping
+        val rawWidth = digitalPaint.measureText(timeText)
+        val maxAllowedWidth = canvas.width * 0.80f
+        if (rawWidth > maxAllowedWidth && rawWidth > 0f) {
+            digitalPaint.textSize = baseTextSize * (maxAllowedWidth / rawWidth)
+        }
+
         val timeWidth = digitalPaint.measureText(timeText)
         val amPmPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = s.numeralColor
@@ -277,7 +288,7 @@ object ClockRenderer {
             textAlign = Paint.Align.LEFT
         }
         val amPmWidth = if (s.use24HourFormat) 0f else amPmPaint.measureText(amPmText)
-        val spacing = if (s.use24HourFormat) 0f else 15f
+        val spacing = if (s.use24HourFormat) 0f else 15f * scaleFactor
 
         val amPmY = clockY + s.clockOffsetY - (digitalPaint.textSize * 0.12f)
 
@@ -443,20 +454,20 @@ object ClockRenderer {
 
             if (s.showDate) {
                 datePaint.color = s.dateColor
-                datePaint.textSize = s.dateSize
+                datePaint.textSize = s.dateSize * scaleFactor
 
                 val dateText = dateFormat.format(cal.time)
                 canvas.drawText(dateText, bottomTextX, textY, datePaint)
 
                 if (s.showDay) {
                     datePaint.color = s.dayColor
-                    datePaint.textSize = s.daySize
+                    datePaint.textSize = s.daySize * scaleFactor
                     val dayText = dayFormat.format(cal.time)
-                    canvas.drawText(dayText, bottomTextX, textY + s.dateSize + 25f, datePaint)
+                    canvas.drawText(dayText, bottomTextX, textY + (s.dateSize * scaleFactor) + (15f * scaleFactor), datePaint)
                 }
             } else if (s.showDay) {
                 datePaint.color = s.dayColor
-                datePaint.textSize = s.daySize
+                datePaint.textSize = s.daySize * scaleFactor
                 val dayText = dayFormat.format(cal.time)
                 canvas.drawText(dayText, bottomTextX, textY, datePaint)
             }
