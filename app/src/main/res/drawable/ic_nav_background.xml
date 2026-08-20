@@ -1,0 +1,481 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="28dp"
+    android:height="28dp"
+    android:viewportWidth="96"
+    android:viewportHeight="96">
+
+    <!-- ========================================================= -->
+    <!-- SUBTLE AMBIENT GLOW                                      -->
+    <!-- ========================================================= -->
+    <path
+        android:pathData="M48,7
+                          A41,41 0,1 1,48,89
+                          A41,41 0,1 1,48,7">
+
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="radial"
+                android:centerX="48"
+                android:centerY="45"
+                android:gradientRadius="42">
+
+                <item
+                    android:offset="0"
+                    android:color="#3000E5FF" />
+
+                <item
+                    android:offset="0.58"
+                    android:color="#150066FF" />
+
+                <item
+                    android:offset="1"
+                    android:color="#00000000" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+
+    <!-- ========================================================= -->
+    <!-- BASE SHADOW                                              -->
+    <!-- ========================================================= -->
+    <path
+        android:pathData="M17,77
+                          L79,77
+                          C85,77 89,80 89,84
+                          C89,88 85,90 79,90
+                          L17,90
+                          C11,90 7,88 7,84
+                          C7,80 11,77 17,77 Z"
+        android:fillColor="#281F8AFF" />
+
+
+    <!-- ========================================================= -->
+    <!-- GLASS BASE PLATFORM                                     -->
+    <!-- ========================================================= -->
+    <path
+        android:pathData="M17,75
+                          L79,75
+                          C85,75 89,78 89,83
+                          C89,87 85,89 79,89
+                          L17,89
+                          C11,89 7,87 7,83
+                          C7,78 11,75 17,75 Z"
+        android:strokeWidth="1.2"
+        android:strokeColor="#80DFFFFF">
+
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="7"
+                android:startY="75"
+                android:endX="89"
+                android:endY="89">
+
+                <item
+                    android:offset="0"
+                    android:color="#5518DFFF" />
+
+                <item
+                    android:offset="0.5"
+                    android:color="#451D78FF" />
+
+                <item
+                    android:offset="1"
+                    android:color="#7014CFFF" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+
+    <!-- ========================================================= -->
+    <!-- MAIN GLASS FRAME                                         -->
+    <!-- ========================================================= -->
+    <path
+        android:pathData="M17,19
+                          L79,19
+                          C84.5,19 89,23.5 89,29
+                          L89,69
+                          C89,74.5 84.5,79 79,79
+                          L17,79
+                          C11.5,79 7,74.5 7,69
+                          L7,29
+                          C7,23.5 11.5,19 17,19 Z"
+        android:strokeWidth="2"
+        android:strokeColor="#C0F3FFFF">
+
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="8"
+                android:startY="19"
+                android:endX="88"
+                android:endY="79">
+
+                <item
+                    android:offset="0"
+                    android:color="#B5EDFCFF" />
+
+                <item
+                    android:offset="0.24"
+                    android:color="#7018CFFF" />
+
+                <item
+                    android:offset="0.65"
+                    android:color="#500074D8" />
+
+                <item
+                    android:offset="1"
+                    android:color="#4000174B" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+
+    <!-- ========================================================= -->
+    <!-- INNER PICTURE AREA                                       -->
+    <!-- ========================================================= -->
+    <path
+        android:pathData="M12,29
+                          C12,25.7 14.7,23 18,23
+                          L78,23
+                          C81.3,23 84,25.7 84,29
+                          L84,69
+                          C84,72.3 81.3,75 78,75
+                          L18,75
+                          C14.7,75 12,72.3 12,69 Z"
+        android:fillColor="#2600A8E8" />
+
+
+    <!-- ========================================================= -->
+    <!-- INNER SKY GLASS                                          -->
+    <!-- ========================================================= -->
+    <path
+        android:pathData="M12,29
+                          C12,25.7 14.7,23 18,23
+                          L78,23
+                          C81.3,23 84,25.7 84,29
+                          L84,54
+                          C65,47 37,46 12,53 Z">
+
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="48"
+                android:startY="23"
+                android:endX="48"
+                android:endY="57">
+
+                <item
+                    android:offset="0"
+                    android:color="#80E8FAFF" />
+
+                <item
+                    android:offset="0.45"
+                    android:color="#5012BFFF" />
+
+                <item
+                    android:offset="1"
+                    android:color="#35004BA8" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+
+    <!-- ========================================================= -->
+    <!-- SUN HALO                                                 -->
+    <!-- ========================================================= -->
+    <path
+        android:pathData="M28,34
+                          A10,10 0,1 1,28,54
+                          A10,10 0,1 1,28,34">
+
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="radial"
+                android:centerX="28"
+                android:centerY="44"
+                android:gradientRadius="10">
+
+                <item
+                    android:offset="0"
+                    android:color="#55FFF3A0" />
+
+                <item
+                    android:offset="0.5"
+                    android:color="#25FFD83D" />
+
+                <item
+                    android:offset="1"
+                    android:color="#00000000" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+
+    <!-- ========================================================= -->
+    <!-- SUN CORE                                                 -->
+    <!-- ========================================================= -->
+    <path
+        android:pathData="M28,37
+                          A7,7 0,1 1,28,51
+                          A7,7 0,1 1,28,37"
+        android:strokeWidth="1"
+        android:strokeColor="#FFFFFFFF">
+
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="22"
+                android:startY="37"
+                android:endX="34"
+                android:endY="51">
+
+                <item
+                    android:offset="0"
+                    android:color="#FFFFF27A" />
+
+                <item
+                    android:offset="0.5"
+                    android:color="#FFFFD438" />
+
+                <item
+                    android:offset="1"
+                    android:color="#FFFF8A00" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+
+    <!-- ========================================================= -->
+    <!-- REAR MOUNTAIN                                           -->
+    <!-- ========================================================= -->
+    <path
+        android:pathData="M34,74
+                          L54,45
+                          C56,42
+                          59,38
+                          61,38
+                          C63,38
+                          66,42
+                          68,45
+                          L85,68
+                          L85,74 Z"
+        android:strokeWidth="1"
+        android:strokeColor="#80B9FFFF">
+
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="52"
+                android:startY="39"
+                android:endX="82"
+                android:endY="74">
+
+                <item
+                    android:offset="0"
+                    android:color="#5500F2FE" />
+
+                <item
+                    android:offset="0.5"
+                    android:color="#500087FF" />
+
+                <item
+                    android:offset="1"
+                    android:color="#450034A8" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+
+    <!-- Rear mountain snow/glass cap -->
+    <path
+        android:pathData="M54,45
+                          L61,38
+                          L68,45
+                          L64,44
+                          L61,47
+                          L58,43
+                          Z"
+        android:fillColor="#70FFFFFF" />
+
+
+    <!-- ========================================================= -->
+    <!-- FRONT MOUNTAIN                                           -->
+    <!-- ========================================================= -->
+    <path
+        android:pathData="M11,74
+                          L30,49
+                          C32,46
+                          35,43
+                          37,43
+                          C39,43
+                          42,47
+                          44,50
+                          L57,68
+                          L62,74 Z"
+        android:strokeWidth="1"
+        android:strokeColor="#90DFFFFF">
+
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="30"
+                android:startY="43"
+                android:endX="56"
+                android:endY="74">
+
+                <item
+                    android:offset="0"
+                    android:color="#6000E676" />
+
+                <item
+                    android:offset="0.45"
+                    android:color="#5000CFFF" />
+
+                <item
+                    android:offset="1"
+                    android:color="#45004AA8" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+
+    <!-- ========================================================= -->
+    <!-- FRONT MOUNTAIN LIGHT FACE                               -->
+    <!-- ========================================================= -->
+    <path
+        android:pathData="M30,49
+                          L37,43
+                          L44,50
+                          L40,48
+                          L36,53
+                          Z"
+        android:fillColor="#80FFFFFF" />
+
+
+    <!-- ========================================================= -->
+    <!-- DISTANT HILLS                                            -->
+    <!-- ========================================================= -->
+    <path
+        android:pathData="M12,64
+                          C21,59 27,60 34,64
+                          C42,58 49,58 57,63
+                          C66,57 75,59 84,64
+                          L84,75
+                          L12,75 Z"
+        android:fillColor="#2800B8D9" />
+
+
+    <!-- ========================================================= -->
+    <!-- FOREGROUND GLASS LAND                                    -->
+    <!-- ========================================================= -->
+    <path
+        android:pathData="M12,68
+                          C28,65 42,69 54,67
+                          C65,65 75,65 84,69
+                          L84,75
+                          L12,75 Z"
+        android:fillColor="#3000E6A8" />
+
+
+    <!-- ========================================================= -->
+    <!-- SMALL REFLECTIVE WATER STRIP                             -->
+    <!-- ========================================================= -->
+    <path
+        android:pathData="M43,68
+                          C53,66 65,66 76,69
+                          C65,70 53,70 43,68 Z"
+        android:fillColor="#70FFFFFF" />
+
+
+    <!-- ========================================================= -->
+    <!-- FRAME TOP SPECULAR REFLECTION                            -->
+    <!-- ========================================================= -->
+    <path
+        android:pathData="M12,23
+                          L84,23
+                          L84,30
+                          C65,28
+                          35,25
+                          12,24 Z"
+        android:fillColor="#80FFFFFF" />
+
+
+    <!-- ========================================================= -->
+    <!-- LEFT GLASS REFRACTION                                    -->
+    <!-- ========================================================= -->
+    <path
+        android:pathData="M12,29
+                          C12,26 14,24 17,24
+                          L22,24
+                          L22,73
+                          L17,73
+                          C14,73 12,71 12,68 Z"
+        android:fillColor="#30FFFFFF" />
+
+
+    <!-- ========================================================= -->
+    <!-- RIGHT EDGE REFLECTION                                    -->
+    <!-- ========================================================= -->
+    <path
+        android:pathData="M81,25
+                          C83,26 84,28 84,30
+                          L84,69
+                          C84,72 82,73 81,73 Z"
+        android:fillColor="#25FFFFFF" />
+
+
+    <!-- ========================================================= -->
+    <!-- INNER FRAME BORDER                                       -->
+    <!-- ========================================================= -->
+    <path
+        android:pathData="M18,23
+                          L78,23
+                          C81.3,23 84,25.7 84,29
+                          L84,69
+                          C84,72.3 81.3,75 78,75
+                          L18,75
+                          C14.7,75 12,72.3 12,69
+                          L12,29
+                          C12,25.7 14.7,23 18,23 Z"
+        android:strokeWidth="0.9"
+        android:strokeColor="#65FFFFFF"
+        android:fillColor="#00000000" />
+
+
+    <!-- ========================================================= -->
+    <!-- FRAME EDGE HIGHLIGHTS                                    -->
+    <!-- ========================================================= -->
+    <path
+        android:pathData="M17,20 L79,20"
+        android:strokeWidth="1"
+        android:strokeColor="#E0FFFFFF"
+        android:strokeLineCap="round" />
+
+    <path
+        android:pathData="M9,29 L9,69"
+        android:strokeWidth="1"
+        android:strokeColor="#80FFFFFF"
+        android:strokeLineCap="round" />
+
+    <path
+        android:pathData="M87,29 L87,69"
+        android:strokeWidth="1"
+        android:strokeColor="#45FFFFFF"
+        android:strokeLineCap="round" />
+
+
+    <!-- ========================================================= -->
+    <!-- LOWER GLASS REFLECTION                                   -->
+    <!-- ========================================================= -->
+    <path
+        android:pathData="M12,70
+                          C31,73 59,73 84,69
+                          L84,74
+                          C82,75 80,76 77,76
+                          L19,76
+                          C15,76 13,74 12,70 Z"
+        android:fillColor="#20FFFFFF" />
+
+</vector>

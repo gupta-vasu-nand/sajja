@@ -12,6 +12,10 @@ import com.vng.sajja.domain.repository.WallpaperSettingsRepository
 import com.vng.sajja.ui.utils.ClockRenderer
 import java.util.Calendar
 
+import android.content.Intent
+import android.content.IntentFilter
+import android.os.BatteryManager
+
 class ArabicClockWallpaperService : WallpaperService() {
 
     override fun onCreateEngine(): Engine {
@@ -26,6 +30,16 @@ class ArabicClockWallpaperService : WallpaperService() {
         private val bitmapCache = mutableMapOf<String, Bitmap>()
 
         private val ticker = Runnable { drawFrame() }
+
+        private fun isCharging(): Boolean {
+            return try {
+                val intent = registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
+                val status = intent?.getIntExtra(BatteryManager.EXTRA_STATUS, -1) ?: -1
+                status == BatteryManager.BATTERY_STATUS_CHARGING || status == BatteryManager.BATTERY_STATUS_FULL
+            } catch (_: Exception) {
+                false
+            }
+        }
 
         override fun onCreate(surfaceHolder: SurfaceHolder?) {
             super.onCreate(surfaceHolder)
@@ -58,12 +72,13 @@ class ArabicClockWallpaperService : WallpaperService() {
             val canvas = surfaceHolder.lockCanvas() ?: return
             try {
                 val settings = repository.load().copy(clockType = ClockType.ARABIC)
-                val isAnimated = settings.smoothSecondHand ||
+                val charging = isCharging()
+                val isAnimated = charging || settings.smoothSecondHand ||
                         settings.particleType != com.vng.sajja.domain.model.ParticleType.NONE ||
                         (settings.clockType == ClockType.DIGITAL && settings.digitalAnimType != com.vng.sajja.domain.model.DigitalAnimType.NONE)
                 val frameDelay = if (isAnimated) 16L else 1000L
 
-                ClockRenderer.draw(canvas, settings, Calendar.getInstance(), ::loadBitmap)
+                ClockRenderer.draw(canvas, settings, Calendar.getInstance(), ::loadBitmap, isCharging = charging)
 
                 surfaceHolder.unlockCanvasAndPost(canvas)
 

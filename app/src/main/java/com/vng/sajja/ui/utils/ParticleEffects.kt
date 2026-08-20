@@ -36,46 +36,95 @@ object ParticleEffects {
             lastHeight = h
             particles.clear()
             for (i in 0 until s.particleCount) {
-                particles.add(createParticle(w, h, s.particleType))
+                particles.add(createParticle(w, h, s))
             }
         }
 
         // Update and draw particles
         for (p in particles) {
             updateParticle(p, w, h, s)
-            drawParticle(canvas, p, s.particleType)
+            drawParticle(canvas, p, s)
         }
     }
 
-    private fun createParticle(w: Int, h: Int, type: ParticleType): Particle {
+    private fun createParticle(w: Int, h: Int, s: WallpaperSettings): Particle {
         val r = Random
+        val type = s.particleType
         val size = when (type) {
             ParticleType.SNOW -> r.nextFloat() * 8f + 4f
             ParticleType.BUBBLES -> r.nextFloat() * 15f + 5f
             ParticleType.STARS -> r.nextFloat() * 6f + 3f
             ParticleType.FIREFLIES -> r.nextFloat() * 12f + 6f
             ParticleType.RAIN -> r.nextFloat() * 15f + 15f
+            ParticleType.CUSTOM -> r.nextFloat() * 16f + 6f
             else -> 5f
         }
-        val vx = when (type) {
-            ParticleType.SNOW -> r.nextFloat() * 1f - 0.5f
-            ParticleType.BUBBLES -> r.nextFloat() * 0.8f - 0.4f
-            ParticleType.STARS -> -(r.nextFloat() * 7f + 5f)
-            ParticleType.FIREFLIES -> r.nextFloat() * 1.5f - 0.75f
-            ParticleType.RAIN -> -2f
-            else -> 0f
+        var vx = 0f
+        var vy = 0f
+        when (type) {
+            ParticleType.SNOW -> {
+                vx = r.nextFloat() * 1f - 0.5f
+                vy = r.nextFloat() * 2f + 1f
+            }
+            ParticleType.BUBBLES -> {
+                vx = r.nextFloat() * 0.8f - 0.4f
+                vy = -(r.nextFloat() * 1.5f + 0.5f)
+            }
+            ParticleType.STARS -> {
+                vx = -(r.nextFloat() * 7f + 5f)
+                vy = r.nextFloat() * 1.5f + 0.2f
+            }
+            ParticleType.FIREFLIES -> {
+                vx = r.nextFloat() * 1.5f - 0.75f
+                vy = r.nextFloat() * 1.0f - 0.5f
+            }
+            ParticleType.RAIN -> {
+                vx = -2f
+                vy = r.nextFloat() * 18f + 18f
+            }
+            ParticleType.CUSTOM -> {
+                when (s.customParticleDirection.uppercase()) {
+                    "UP" -> {
+                        vy = -(r.nextFloat() * 2f + 1f)
+                        vx = r.nextFloat() * 0.4f - 0.2f
+                    }
+                    "DOWN" -> {
+                        vy = r.nextFloat() * 2f + 1f
+                        vx = r.nextFloat() * 0.4f - 0.2f
+                    }
+                    "LEFT" -> {
+                        vx = -(r.nextFloat() * 2f + 1f)
+                        vy = r.nextFloat() * 0.4f - 0.2f
+                    }
+                    "RIGHT" -> {
+                        vx = r.nextFloat() * 2f + 1f
+                        vy = r.nextFloat() * 0.4f - 0.2f
+                    }
+                    "FLOAT" -> {
+                        vx = r.nextFloat() * 2f - 1f
+                        vy = r.nextFloat() * 2f - 1f
+                    }
+                    "WAVE" -> {
+                        vy = -(r.nextFloat() * 2f + 1f)
+                        vx = r.nextFloat() * 0.6f - 0.3f
+                    }
+                    "EXPLODE" -> {
+                        val angle = r.nextFloat() * 2f * Math.PI.toFloat()
+                        val speed = r.nextFloat() * 3f + 1f
+                        vx = speed * kotlin.math.cos(angle)
+                        vy = speed * kotlin.math.sin(angle)
+                    }
+                }
+            }
+            else -> {}
         }
-        val vy = when (type) {
-            ParticleType.SNOW -> r.nextFloat() * 2f + 1f
-            ParticleType.BUBBLES -> -(r.nextFloat() * 1.5f + 0.5f)
-            ParticleType.STARS -> r.nextFloat() * 1.5f + 0.2f
-            ParticleType.FIREFLIES -> r.nextFloat() * 1.0f - 0.5f
-            ParticleType.RAIN -> r.nextFloat() * 18f + 18f
-            else -> 0f
-        }
+
+        val startX = if (type == ParticleType.CUSTOM && s.customParticleDirection.uppercase() == "EXPLODE") w / 2f else r.nextFloat() * w
+        val startY = if (type == ParticleType.CUSTOM && s.customParticleDirection.uppercase() == "EXPLODE") h / 2f else r.nextFloat() * h
+
         return Particle(
-            x = r.nextFloat() * w,
-            y = r.nextFloat() * h,
+            x = startX,
+            y = startY,
             size = size,
             vx = vx,
             vy = vy,
@@ -122,7 +171,7 @@ object ParticleEffects {
                 }
                 if (p.x < -p.size * 6f || p.y > h + p.size) {
                     p.x = w + p.size
-                    p.y = r.nextFloat() * (h * 0.8f) // Spawn mostly in upper 80%
+                    p.y = r.nextFloat() * (h * 0.8f)
                     p.alpha = r.nextInt(100) + 100
                 }
             }
@@ -150,12 +199,42 @@ object ParticleEffects {
                     p.x = r.nextFloat() * w
                 }
             }
+            ParticleType.CUSTOM -> {
+                val dir = s.customParticleDirection.uppercase()
+                if (dir == "WAVE") {
+                    p.x += kotlin.math.sin(p.y / 30f) * 1.2f
+                }
+                
+                if (dir == "UP" && p.y < -p.size) {
+                    p.y = h + p.size
+                    p.x = r.nextFloat() * w
+                } else if (dir == "DOWN" && p.y > h + p.size) {
+                    p.y = -p.size
+                    p.x = r.nextFloat() * w
+                } else if (dir == "LEFT" && p.x < -p.size) {
+                    p.x = w + p.size
+                    p.y = r.nextFloat() * h
+                } else if (dir == "RIGHT" && p.x > w + p.size) {
+                    p.x = -p.size
+                    p.y = r.nextFloat() * h
+                } else if (dir == "EXPLODE" && (p.x < 0 || p.x > w || p.y < 0 || p.y > h)) {
+                    p.x = w / 2f
+                    p.y = h / 2f
+                    p.alpha = r.nextInt(100) + 100
+                } else {
+                    if (p.x < -p.size || p.x > w + p.size || p.y < -p.size || p.y > h + p.size) {
+                        p.x = r.nextFloat() * w
+                        p.y = r.nextFloat() * h
+                    }
+                }
+            }
             else -> {}
         }
     }
 
-    private fun drawParticle(canvas: Canvas, p: Particle, type: ParticleType) {
+    private fun drawParticle(canvas: Canvas, p: Particle, s: WallpaperSettings) {
         paint.alpha = p.alpha
+        val type = s.particleType
         when (type) {
             ParticleType.SNOW -> {
                 paint.color = Color.WHITE
@@ -187,6 +266,32 @@ object ParticleEffects {
                 paint.color = Color.parseColor("#80A0C0")
                 paint.strokeWidth = 3f
                 canvas.drawLine(p.x, p.y, p.x + p.vx, p.y + p.size, paint)
+            }
+            ParticleType.CUSTOM -> {
+                paint.color = s.customParticleColor
+                paint.alpha = p.alpha
+                
+                when (s.customParticleShape.uppercase()) {
+                    "CIRCLE" -> {
+                        canvas.drawCircle(p.x, p.y, p.size, paint)
+                    }
+                    "SQUARE" -> {
+                        canvas.drawRect(p.x - p.size, p.y - p.size, p.x + p.size, p.y + p.size, paint)
+                    }
+                    "LINE" -> {
+                        paint.strokeWidth = 3f
+                        canvas.drawLine(p.x, p.y, p.x + p.vx * 2f, p.y + p.vy * 2f, paint)
+                    }
+                    "TEXT" -> {
+                        paint.textSize = p.size * 1.8f
+                        paint.textAlign = Paint.Align.CENTER
+                        val glyph = if (s.customParticleText.isNotBlank()) s.customParticleText else "✨"
+                        canvas.drawText(glyph, p.x, p.y + p.size * 0.6f, paint)
+                    }
+                    else -> {
+                        canvas.drawCircle(p.x, p.y, p.size, paint)
+                    }
+                }
             }
             else -> {}
         }

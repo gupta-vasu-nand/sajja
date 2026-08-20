@@ -65,7 +65,11 @@ class WallpaperSettingsRepositoryImpl(context: Context) : WallpaperSettingsRepos
             digitalAnimType = DigitalAnimType.valueOf(
                 prefs.getString("digital_anim_type", DigitalAnimType.NONE.name)!!
             ),
-            digitalAnimDuration = prefs.getLong("digital_anim_duration", 300L)
+            digitalAnimDuration = prefs.getLong("digital_anim_duration", 300L),
+            customParticleShape = prefs.getString("custom_particle_shape", "CIRCLE")!!,
+            customParticleText = prefs.getString("custom_particle_text", "✨")!!,
+            customParticleDirection = prefs.getString("custom_particle_direction", "UP")!!,
+            customParticleColor = prefs.getInt("custom_particle_color", -1)
         )
     }
 
@@ -115,6 +119,10 @@ class WallpaperSettingsRepositoryImpl(context: Context) : WallpaperSettingsRepos
             putInt("particle_count", s.particleCount)
             putString("digital_anim_type", s.digitalAnimType.name)
             putLong("digital_anim_duration", s.digitalAnimDuration)
+            putString("custom_particle_shape", s.customParticleShape)
+            putString("custom_particle_text", s.customParticleText)
+            putString("custom_particle_direction", s.customParticleDirection)
+            putInt("custom_particle_color", s.customParticleColor)
         }
     }
 }

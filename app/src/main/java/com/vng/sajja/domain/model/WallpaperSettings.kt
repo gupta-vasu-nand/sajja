@@ -15,7 +15,7 @@ enum class ClockPosition {
 }
 
 enum class ParticleType {
-    NONE, SNOW, BUBBLES, STARS, FIREFLIES, RAIN
+    NONE, SNOW, BUBBLES, STARS, FIREFLIES, RAIN, CUSTOM
 }
 
 enum class DigitalAnimType {
@@ -66,5 +66,9 @@ data class WallpaperSettings(
     val particleSpeed: Float = 1.0f,
     val particleCount: Int = 40,
     val digitalAnimType: DigitalAnimType = DigitalAnimType.NONE,
-    val digitalAnimDuration: Long = 300L
+    val digitalAnimDuration: Long = 300L,
+    val customParticleShape: String = "CIRCLE",
+    val customParticleText: String = "✨",
+    val customParticleDirection: String = "UP",
+    val customParticleColor: Int = Color.WHITE
 )

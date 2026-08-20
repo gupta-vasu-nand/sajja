@@ -1,9 +1,6 @@
-# Task List - UPGRADED NAVIGATION AND ANIMATION MANAGER
+# Task List - PERFORMANCE ENGINE AND NAVIGATION STUTTER FIXES
 
-- [x] Create CustomAnimationEntity and CustomAnimationDao for Room Database
-- [x] Update AppDatabase to version 2 with fallbackToDestructiveMigration and expose CustomAnimationDao
-- [x] Update AppContainer to expose CustomAnimationDao
-- [x] Modify CommonBottomNavBar.kt with Home, Clock Face, and Background items
-- [x] Modify MainScreen.kt to update CircularFabMenu items and add animation_manager route
-- [x] Create AnimationManagerScreen.kt with predefined presets, active previews, custom save dialogs, and database preset manager
-- [x] Compile and verify the build
+- [x] Pass `isVisible` states inside `HorizontalPager` pages: Page 0 is visible when current index is 0, Page 2 is visible when current index is 2.
+- [x] Update `LivePreview` to only loop delays at 60fps when `isVisible` is true, dropping to 1fps when the screen is hidden.
+- [x] Offload timing loop ticks to `Dispatchers.Default` background threads.
+- [x] Compile and verify the build.
